@@ -93,7 +93,7 @@ if os.path.exists(FILE_AUTO):
             if 'Tot. sprint' in report_finale.columns:
                 m3.metric("⚡ SPRINT COMPLESSIVI", f"{report_finale['Tot. sprint'].sum():.1f}")
                 
-            st.markdown("<br>", unsafe-allow_html=True)
+            st.markdown("<br>", unsafe_allow_html=True)
             
             # Seconda riga (Le altre 5 metriche fisiche)
             sub_cols = st.columns(5)
@@ -113,7 +113,7 @@ if os.path.exists(FILE_AUTO):
             st.write("### 📋 DETTAGLIO EXCEL DEGLI ESERCIZI DI OGGI")
             st.dataframe(report_finale.style.background_gradient(cmap="Blues", subset=['total dist. Stimati (m)']))
             
-            st.markdown("<br>", unsafe-allow_html=True)
+            st.markdown("<br>", unsafe_allow_html=True)
             st.download_button(
                 label="📥 SCARICA REPORT EXCEL UFFICIALE",
                 data=report_finale.to_csv(index=False).encode('utf-8'),
