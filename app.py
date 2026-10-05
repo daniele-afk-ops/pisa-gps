@@ -22,7 +22,7 @@ with col_logo:
     if os.path.exists("stemma_pisa.png"):
         st.image("stemma_pisa.png", width=120)
 with col_titolo:
-    st.title("PISA SPORTING CLUB")
+    st.title("🔵⚫ PISA SPORTING CLUB")
     st.subheader("Performance & Analytics — Stima del Carico Atletico")
 
 st.markdown("<hr style='border-top: 3px solid #002855;'>", unsafe_allow_html=True)
@@ -57,7 +57,7 @@ if os.path.exists(FILE_AUTO):
         
         if scelte:
             programma = []
-            st.write("### ⏱ shrink Volume di Lavoro (Inserisci la durata per esercizio)")
+            st.write("### ⏱️ Volume di Lavoro (Inserisci la durata per esercizio)")
             
             cols_minuti = st.columns(len(scelte))
             for i, es in enumerate(scelte):
@@ -65,7 +65,7 @@ if os.path.exists(FILE_AUTO):
                     minuti = st.number_input(f"🏃 {es} (min)", min_value=1, max_value=120, value=15, key=es)
                     id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values
                     if len(id_es) > 0:
-                        programma.append({'Esercitazione_ID': str(id_es[0]), 'Nuovi_Minuti': minuti})
+                        programma.append({'Esercitazione_ID': str(id_es), 'Nuovi_Minuti': minutes})
             
             df_programma = pd.DataFrame(programma)
             report_stimato = pd.merge(df_programma, db_completo, on='Esercitazione_ID')
@@ -75,8 +75,7 @@ if os.path.exists(FILE_AUTO):
                     nome_col = col.replace('(m)', 'Stimati (m)').replace('n°', 'Tot.').strip()
                     report_stimato[nome_col] = report_stimato[col] * report_stimato['Nuovi_Minuti']
                     
-                    # 🛠️ ARROTONDAMENTO AUTOMATICO PER LE VIRGOLE
-                    if 'sprint' in nome_col or 'breaks' in nome_col:
+                    if 'sprint' in nome_col or 'breaks' in nome_col or 'burst' in nome_col:
                         report_stimato[nome_col] = report_stimato[nome_col].round(1)
                     else:
                         report_stimato[nome_col] = report_stimato[nome_col].round(0).astype(int)
@@ -84,19 +83,37 @@ if os.path.exists(FILE_AUTO):
             colonne_finali = ['Nome_Esercitazione', 'Nuovi_Minuti', 'Categoria'] + [col.replace('(m)', 'Stimati (m)').replace('n°', 'Tot.').strip() for col in colonne_gps if col in df_gps_totali.columns]
             report_finale = report_stimato[colonne_finali]
             
-            # BLOCCHI METRICHE MODERNE IN EVIDENZA
+            # 📊 RIEPILOGO CARICO STIMATO COMPLETO
             st.write("### 📊 RIEPILOGO CARICO STIMATO")
+            
+            # Prima riga (I 3 Principali)
             m1, m2, m3 = st.columns(3)
             m1.metric("⏱️ VOLUME TOTALE", f"{int(report_finale['Nuovi_Minuti'].sum())} min")
             m2.metric("🏃 DISTANZA COMPLESSIVA", f"{int(report_finale['total dist. Stimati (m)'].sum())} m")
             if 'Tot. sprint' in report_finale.columns:
                 m3.metric("⚡ SPRINT COMPLESSIVI", f"{report_finale['Tot. sprint'].sum():.1f}")
+                
+            st.markdown("<br>", unsafe-allow_html=True)
+            
+            # Seconda riga (Le altre 5 metriche fisiche)
+            sub_cols = st.columns(5)
+            
+            if 'z2 Stimati (m)' in report_finale.columns:
+                sub_cols[0].metric("🏃‍♂️ TOT. ZONA 2", f"{int(report_finale['z2 Stimati (m)'].sum())} m")
+            if 'z3 Stimati (m)' in report_finale.columns:
+                sub_cols[1].metric("🔥 TOT. ZONA 3", f"{int(report_finale['z3 Stimati (m)'].sum())} m")
+            if 'Tot. accel.' in report_finale.columns:
+                sub_cols[2].metric("📈 TOT. ACCELERAZIONI", f"{int(report_finale['Tot. accel.'].sum())}")
+            if 'Tot. decel.' in report_finale.columns:
+                sub_cols[3].metric("📉 TOT. DECELERAZIONI", f"{int(report_finale['Tot. decel.'].sum())}")
+            if 'Tot. burst' in report_finale.columns:
+                sub_cols[4].metric("💥 TOT. BURST", f"{report_finale['Tot. burst'].sum():.1f}")
             
             # TABELLA DETTAGLIATA CON FORMATTAZIONE
             st.write("### 📋 DETTAGLIO EXCEL DEGLI ESERCIZI DI OGGI")
             st.dataframe(report_finale.style.background_gradient(cmap="Blues", subset=['total dist. Stimati (m)']))
             
-            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown("<br>", unsafe-allow_html=True)
             st.download_button(
                 label="📥 SCARICA REPORT EXCEL UFFICIALE",
                 data=report_finale.to_csv(index=False).encode('utf-8'),
