@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import os
 
 # Configurazione della pagina e tema scuro/sportivo
 st.set_page_config(page_title="Pisa SC - GPS Load Planner", layout="wide")
@@ -18,20 +19,21 @@ st.markdown("""
 # 📊 CONFIGURAZIONE INTESTAZIONE
 col_logo, col_titolo = st.columns([1, 4])
 with col_logo:
-    st.image("stemma_pisa.png", width=120)
+    if os.path.exists("stemma_pisa.png"):
+        st.image("stemma_pisa.png", width=120)
 with col_titolo:
     st.title("🔵⚫ PISA SPORTING CLUB")
     st.subheader("Performance & Analytics — Stima del Carico Atletico")
 
 st.markdown("<hr style='border-top: 3px solid #002855;'>", unsafe-allow_index=True)
 
-# CARICAMENTO DATABASE
-uploaded_file = st.file_uploader("📂 Trascina o seleziona il tuo file database_gps.xlsx", type=["xlsx"])
+# 📂 CARICAMENTO AUTOMATICO DEL FILE DA GITHUB
+FILE_AUTO = "database_gps.xlsx"
 
-if uploaded_file is not None:
+if os.path.exists(FILE_AUTO):
     try:
-        df_esercizi = pd.read_excel(uploaded_file, sheet_name='Anagrafica_Esercitazioni')
-        df_gps_totali = pd.read_excel(uploaded_file, sheet_name='Parametri_GPS_Minuto')
+        df_esercizi = pd.read_excel(FILE_AUTO, sheet_name='Anagrafica_Esercitazioni')
+        df_gps_totali = pd.read_excel(FILE_AUTO, sheet_name='Parametri_GPS_Minuto')
         
         df_gps_totali.rename(columns={'esercitazione_ID': 'Esercitazione_ID'}, inplace=True)
         df_esercizi.rename(columns={'Esercitazione_ID': 'Esercitazione_ID'}, inplace=True)
@@ -76,7 +78,7 @@ if uploaded_file is not None:
             report_finale = report_stimato[colonne_finali]
             
             # BLOCCHI METRICHE MODERNE IN EVIDENZA
-            st.write("### 📊 RIEPILOGO CARICO ESTIMATO")
+            st.write("### 📊 RIEPILOGO CARICO STIMATO")
             m1, m2, m3 = st.columns(3)
             m1.metric("⏱️ VOLUME TOTALE", f"{report_finale['Nuovi_Minuti'].sum()} min")
             m2.metric("🏃 DISTANZA COMPLESSIVA", f"{report_finale['total dist. Stimati (m)'].sum():.0f} m")
@@ -95,6 +97,6 @@ if uploaded_file is not None:
                 mime='text/csv',
             )
     except Exception as e:
-        st.error(f"Errore nella lettura dei dati Excel: {e}")
+        st.error(f"Errore nell'elaborazione del file automatico: {e}")
 else:
-    st.info("ℹ️ In attesa del caricamento del file database_gps.xlsx per elaborare il planning.")
+    st.info("ℹ️ Carica il tuo file database_gps.xlsx su GitHub per attivare la lettura automatica.")
