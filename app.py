@@ -6,7 +6,7 @@ st.set_page_config(page_title="Pisa SC - GPS Load Planner", layout="wide")
 # 📊 GRAFICA PERSONALIZZATA: Inserimento dello stemma ufficiale del Pisa SC locale
 col_logo, col_titolo = st.columns([1, 4])
 with col_logo:
-    st.image("stemma_pisa.png", width=120)
+    st.image("https://wikimedia.org", width=130)
 with col_titolo:
     st.title("Pisa SC")
     st.subheader("Pianificazione seduta e stima del carico atletico")
