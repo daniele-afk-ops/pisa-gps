@@ -8,7 +8,7 @@ col_logo, col_titolo = st.columns(2)
 with col_logo:
     st.image("https://wikimedia.org", width=120)
 with col_titolo:
-    st.title("🔵⚫ Pisa SC")
+    st.title("Pisa SC")
     st.subheader("Pianificazione seduta e stima del carico atletico")
 
 st.markdown("---")
