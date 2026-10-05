@@ -64,7 +64,7 @@ if os.path.exists(FILE_AUTO):
                 with cols_minuti[i]:
                     minuti = st.number_input(f"🏃 {es} (min)", min_value=1, max_value=120, value=15, key=es)
                     id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values
-                    programma.append({'Esercitazione_ID': str(id_es), 'Nuovi_Minuti': minuti})
+                    programma.append({'Esercitazione_ID': str(id_es), 'Nuovi_Minuti': minutes})
             
             df_programma = pd.DataFrame(programma)
             report_stimato = pd.merge(df_programma, db_completo, on='Esercitazione_ID')
