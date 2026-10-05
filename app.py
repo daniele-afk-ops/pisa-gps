@@ -14,7 +14,7 @@ st.markdown("""
     h3 { color: #0052a5; }
     .sidebar .sidebar-content { background-color: #002855; color: white; }
     </style>
-""", unsafe-allow_html=True)
+""", unsafe_allow_html=True)
 
 # 📊 CONFIGURAZIONE INTESTAZIONE
 col_logo, col_titolo = st.columns(2)
