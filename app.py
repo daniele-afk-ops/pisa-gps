@@ -5,7 +5,7 @@ import os
 # Configurazione della pagina e tema scuro/sportivo
 st.set_page_config(page_title="Pisa SC - GPS Load Planner", layout="wide")
 
-# 🔵⚫ STILE GRAFICO PERSONALIZZATO (Colori Pisa SC)
+# STILE GRAFICO PERSONALIZZATO (Colori Pisa SC)
 st.markdown("""
     <style>
     .main { background-color: #f5f7fa; }
