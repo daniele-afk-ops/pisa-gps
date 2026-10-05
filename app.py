@@ -23,10 +23,14 @@ if uploaded_file is not None:
         df_gps_totali.rename(columns={'esercitazione_ID': 'Esercitazione_ID'}, inplace=True)
         df_esercizi.rename(columns={'Esercitazione_ID': 'Esercitazione_ID'}, inplace=True)
         
+        # 🛠️ CORREZIONE ERRORE: Forza entrambi gli ID a essere letti come testo
+        df_esercizi['Esercitazione_ID'] = df_esercizi['Esercitazione_ID'].astype(str).str.strip()
+        df_gps_totali['Esercitazione_ID'] = df_gps_totali['Esercitazione_ID'].astype(str).str.strip()
+        
         df_gps_min = df_gps_totali.copy()
         colonne_gps = ['total dist. (m)', 'z2 (m)', 'z3 (m)', 'n° sprint', 'n° accel.', 'n° decel.', 'n° burst', 'n° breaks']
         for col in colonne_gps:
-            df_gps_min[col] = df_gps_totali[col] / df_gps_totali['minuti']
+            df_gps_min[col] = pd.to_numeric(df_gps_totali[col], errors='coerce') / pd.to_numeric(df_gps_totali['minuti'], errors='coerce')
         
         db_completo = pd.merge(df_esercizi, df_gps_min, on='Esercitazione_ID')
         
@@ -41,8 +45,8 @@ if uploaded_file is not None:
             for i, es in enumerate(scelte):
                 with cols_minuti[i]:
                     minuti = st.number_input(f"{es}", min_value=1, max_value=120, value=15, key=es)
-                    id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values
-                    programma.append({'Esercitazione_ID': id_es, 'Nuovi_Minuti': minuti})
+                    id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values[0]
+                    programma.append({'Esercitazione_ID': str(id_es), 'Nuovi_Minuti': minuti})
             
             df_programma = pd.DataFrame(programma)
             report_stimato = pd.merge(df_programma, db_completo, on='Esercitazione_ID')
@@ -70,6 +74,6 @@ if uploaded_file is not None:
                 mime='text/csv',
             )
     except Exception as e:
-        st.error(f"Errore: {e}")
+        st.error(f"Errore nei dati del file Excel: {e}")
 else:
     st.info("ℹ️ Carica il tuo file database_gps.xlsx per iniziare.")
