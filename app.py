@@ -14,10 +14,10 @@ st.markdown("""
     h3 { color: #0052a5; }
     .sidebar .sidebar-content { background-color: #002855; color: white; }
     </style>
-""", unsafe-allow_index=True)
+""", unsafe-allow_html=True)
 
 # 📊 CONFIGURAZIONE INTESTAZIONE
-col_logo, col_titolo = st.columns([1, 4])
+col_logo, col_titolo = st.columns(2)
 with col_logo:
     if os.path.exists("stemma_pisa.png"):
         st.image("stemma_pisa.png", width=120)
@@ -25,7 +25,7 @@ with col_titolo:
     st.title("🔵⚫ PISA SPORTING CLUB")
     st.subheader("Performance & Analytics — Stima del Carico Atletico")
 
-st.markdown("<hr style='border-top: 3px solid #002855;'>", unsafe-allow_index=True)
+st.markdown("<hr style='border-top: 3px solid #002855;'>", unsafe-allow_html=True)
 
 # 📂 CARICAMENTO AUTOMATICO DEL FILE DA GITHUB
 FILE_AUTO = "database_gps.xlsx"
@@ -64,7 +64,7 @@ if os.path.exists(FILE_AUTO):
                 with cols_minuti[i]:
                     minuti = st.number_input(f"🏃 {es} (min)", min_value=1, max_value=120, value=15, key=es)
                     id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values
-                    programma.append({'Esercitazione_ID': str(id_es[0]), 'Nuovi_Minuti': minuti})
+                    programma.append({'Esercitazione_ID': str(id_es), 'Nuovi_Minuti': minuti})
             
             df_programma = pd.DataFrame(programma)
             report_stimato = pd.merge(df_programma, db_completo, on='Esercitazione_ID')
@@ -89,7 +89,7 @@ if os.path.exists(FILE_AUTO):
             st.write("### 📋 DETTAGLIO EXCEL DEGLI ESERCIZI DI OGGI")
             st.dataframe(report_finale.style.background_gradient(cmap="Blues", subset=['total dist. Stimati (m)']))
             
-            st.markdown("<br>", unsafe-allow_index=True)
+            st.markdown("<br>", unsafe-allow_html=True)
             st.download_button(
                 label="📥 SCARICA REPORT EXCEL UFFICIALE",
                 data=report_finale.to_csv(index=False).encode('utf-8'),
