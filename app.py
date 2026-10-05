@@ -22,10 +22,10 @@ with col_logo:
     if os.path.exists("stemma_pisa.png"):
         st.image("stemma_pisa.png", width=120)
 with col_titolo:
-    st.title("🔵⚫ PISA SPORTING CLUB")
+    st.title("PISA SPORTING CLUB")
     st.subheader("Performance & Analytics — Stima del Carico Atletico")
 
-st.markdown("<hr style='border-top: 3px solid #002855;'>", unsafe-allow_html=True)
+st.markdown("<hr style='border-top: 3px solid #002855;'>", unsafe_allow_html=True)
 
 # 📂 CARICAMENTO AUTOMATICO DEL FILE DA GITHUB
 FILE_AUTO = "database_gps.xlsx"
@@ -96,7 +96,7 @@ if os.path.exists(FILE_AUTO):
             st.write("### 📋 DETTAGLIO EXCEL DEGLI ESERCIZI DI OGGI")
             st.dataframe(report_finale.style.background_gradient(cmap="Blues", subset=['total dist. Stimati (m)']))
             
-            st.markdown("<br>", unsafe-allow_html=True)
+            st.markdown("<br>", unsafe_allow_html=True)
             st.download_button(
                 label="📥 SCARICA REPORT EXCEL UFFICIALE",
                 data=report_finale.to_csv(index=False).encode('utf-8'),
