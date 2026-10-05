@@ -1,18 +1,31 @@
 import streamlit as st
 import pandas as pd
 
+# Configurazione della pagina e tema scuro/sportivo
 st.set_page_config(page_title="Pisa SC - GPS Load Planner", layout="wide")
 
-# 📊 GRAFICA PERSONALIZZATA: Inserimento dello stemma ufficiale del Pisa SC locale
+# 🔵⚫ STILE GRAFICO PERSONALIZZATO (Colori Pisa SC)
+st.markdown("""
+    <style>
+    .main { background-color: #f5f7fa; }
+    .stMetric { background-color: #ffffff; padding: 15px; border-radius: 10px; border-left: 5px solid #0052a5; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    h1 { color: #002855; font-weight: 800; }
+    h3 { color: #0052a5; }
+    .sidebar .sidebar-content { background-color: #002855; color: white; }
+    </style>
+""", unsafe-allow_index=True)
+
+# 📊 CONFIGURAZIONE INTESTAZIONE
 col_logo, col_titolo = st.columns([1, 4])
 with col_logo:
     st.image("stemma_pisa.png", width=120)
 with col_titolo:
-    st.title("Pisa SC")
-    st.subheader("Pianificazione seduta e stima del carico atletico")
+    st.title("🔵⚫ PISA SPORTING CLUB")
+    st.subheader("Performance & Analytics — Stima del Carico Atletico")
 
-st.markdown("---")
+st.markdown("<hr style='border-top: 3px solid #002855;'>", unsafe-allow_index=True)
 
+# CARICAMENTO DATABASE
 uploaded_file = st.file_uploader("📂 Trascina o seleziona il tuo file database_gps.xlsx", type=["xlsx"])
 
 if uploaded_file is not None:
@@ -35,17 +48,19 @@ if uploaded_file is not None:
         
         db_completo = pd.merge(df_esercizi, df_gps_min, on='Esercitazione_ID')
         
-        st.sidebar.header("📋 Seleziona Esercitazioni")
+        # INTERFACCIA BARRA LATERALE (NEROAZZURRA)
+        st.sidebar.markdown("## 📋 CONFIGURATORE SEDUTA")
         esercizi_disponibili = db_completo['Nome_Esercitazione'].tolist()
-        scelte = st.sidebar.multiselect("Quali esercizi svolgi oggi?", esercizi_disponibili)
+        scelte = st.sidebar.multiselect("Quali esercitazioni svolgi oggi?", esercizi_disponibili)
         
         if scelte:
             programma = []
-            st.write("### ⏱️ Inserisci la durata in minuti per ogni lavoro:")
+            st.write("### ⏱️ Volume di Lavoro (Inserisci la durata per esercizio)")
+            
             cols_minuti = st.columns(len(scelte))
             for i, es in enumerate(scelte):
                 with cols_minuti[i]:
-                    minuti = st.number_input(f"{es}", min_value=1, max_value=120, value=15, key=es)
+                    minuti = st.number_input(f"🏃 {es} (min)", min_value=1, max_value=120, value=15, key=es)
                     id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values
                     programma.append({'Esercitazione_ID': str(id_es[0]), 'Nuovi_Minuti': minuti})
             
@@ -60,23 +75,26 @@ if uploaded_file is not None:
             colonne_finali = ['Nome_Esercitazione', 'Nuovi_Minuti', 'Categoria'] + [col.replace('(m)', 'Stimati (m)').replace('n°', 'Tot.').strip() for col in colonne_gps if col in df_gps_totali.columns]
             report_finale = report_stimato[colonne_finali]
             
-            st.write("### 📊 Carico Totale Stimato Allenamento")
+            # BLOCCHI METRICHE MODERNE IN EVIDENZA
+            st.write("### 📊 RIEPILOGO CARICO ESTIMATO")
             m1, m2, m3 = st.columns(3)
-            m1.metric("⏱️ Durata Totale", f"{report_finale['Nuovi_Minuti'].sum()} min")
-            m2.metric("🏃 Distanza Totale", f"{report_finale['total dist. Stimati (m)'].sum():.0f} m")
+            m1.metric("⏱️ VOLUME TOTALE", f"{report_finale['Nuovi_Minuti'].sum()} min")
+            m2.metric("🏃 DISTANZA COMPLESSIVA", f"{report_finale['total dist. Stimati (m)'].sum():.0f} m")
             if 'Tot. sprint' in report_finale.columns:
-                m3.metric("⚡ Sprint Totali", f"{report_finale['Tot. sprint'].sum():.0f}")
+                m3.metric("⚡ SPRINT COMPLESSIVI", f"{report_finale['Tot. sprint'].sum():.1f}")
             
-            st.write("### 📋 Dettaglio Lavori Odierni")
-            st.dataframe(report_finale)
+            # TABELLA DETTAGLIATA CON FORMATTAZIONE
+            st.write("### 📋 DETTAGLIO EXCEL DEGLI ESERCIZI DI OGGI")
+            st.dataframe(report_finale.style.background_gradient(cmap="Blues", subset=['total dist. Stimati (m)']))
             
+            st.markdown("<br>", unsafe-allow_index=True)
             st.download_button(
-                label="📥 Scarica Report Excel",
+                label="📥 SCARICA REPORT EXCEL UFFICIALE",
                 data=report_finale.to_csv(index=False).encode('utf-8'),
                 file_name='Report_Pisa_Oggi.csv',
                 mime='text/csv',
             )
     except Exception as e:
-        st.error(f"Errore nei dati del file Excel: {e}")
+        st.error(f"Errore nella lettura dei dati Excel: {e}")
 else:
-    st.info("ℹ️ Carica il tuo file database_gps.xlsx per iniziare.")
+    st.info("ℹ️ In attesa del caricamento del file database_gps.xlsx per elaborare il planning.")
