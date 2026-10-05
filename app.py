@@ -4,7 +4,7 @@ import pandas as pd
 st.set_page_config(page_title="Pisa SC - GPS Load Planner", layout="wide")
 
 # 📊 GRAFICA PERSONALIZZATA: Inserimento dello stemma ufficiale del Pisa SC
-col_logo, col_titolo = st.columns()
+col_logo, col_titolo = st.columns(2)
 with col_logo:
     st.image("https://wikimedia.org", width=120)
 with col_titolo:
