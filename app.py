@@ -5,7 +5,7 @@ import os
 # Configurazione della pagina e tema scuro/sportivo
 st.set_page_config(page_title="Pisa SC - GPS Load Planner", layout="wide")
 
-# STILE GRAFICO PERSONALIZZATO (Colori Pisa SC)
+# 🔵⚫ STILE GRAFICO PERSONALIZZATO (Colori Pisa SC)
 st.markdown("""
     <style>
     .main { background-color: #f5f7fa; }
@@ -22,7 +22,7 @@ with col_logo:
     if os.path.exists("stemma_pisa.png"):
         st.image("stemma_pisa.png", width=120)
 with col_titolo:
-    st.title("🔵⚫ PISA SPORTING CLUB")
+    st.title("PISA SPORTING CLUB")
     st.subheader("Performance & Analytics — Stima del Carico Atletico")
 
 st.markdown("<hr style='border-top: 3px solid #002855;'>", unsafe_allow_html=True)
