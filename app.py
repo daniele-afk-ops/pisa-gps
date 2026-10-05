@@ -25,7 +25,7 @@ with col_titolo:
     st.title("🔵⚫ PISA SPORTING CLUB")
     st.subheader("Performance & Analytics — Stima del Carico Atletico")
 
-st.markdown("<hr style='border-top: 3px solid #002855;'>", unsafe-allow_html=True)
+st.markdown("<hr style='border-top: 3px solid #002855;'>", unsafe_allow_html=True)
 
 # 📂 CARICAMENTO AUTOMATICO DEL FILE DA GITHUB
 FILE_AUTO = "database_gps.xlsx"
