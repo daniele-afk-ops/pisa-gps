@@ -89,7 +89,7 @@ if os.path.exists(FILE_AUTO):
             st.write("### 📋 DETTAGLIO EXCEL DEGLI ESERCIZI DI OGGI")
             st.dataframe(report_finale.style.background_gradient(cmap="Blues", subset=['total dist. Stimati (m)']))
             
-            st.markdown("<br>", unsafe-allow_html=True)
+            st.markdown("<br>", unsafe_allow_html=True)
             st.download_button(
                 label="📥 SCARICA REPORT EXCEL UFFICIALE",
                 data=report_finale.to_csv(index=False).encode('utf-8'),
