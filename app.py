@@ -69,7 +69,7 @@ if os.path.exists(FILE_AUTO):
                     minuti = st.number_input(f"🏃 {es} (min)", min_value=1, max_value=120, value=15, key=f"m_{es}")
                     id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values
                     if len(id_es) > 0:
-                        # 🛠️ CORREZIONE RIGIDA ID: estrae solo il testo pulito del numero senza parentesi quadre
+                        # Estrae l'elemento reale dell'ID pulito in modo che accoppi sempre con l'Excel
                         programma.append({'Esercitazione_ID': str(id_es[0]), 'Nuovi_Minuti': minuti})
                     
             df_prog = pd.DataFrame(programma)
@@ -88,23 +88,28 @@ if os.path.exists(FILE_AUTO):
                     report_finale[col] = pd.to_numeric(report_finale[col], errors='coerce').fillna(0)
                     
             st.write("### 📊 Riepilogo Carico Stimato Allenamento")
+            
+            # Calcolo dei totali pulito e lineare
             v_vol = float(report_finale['Nuovi_Minuti'].sum())
             v_dist = float(report_finale['total dist. Stimati (m)'].sum())
             
-            col_sprint = [c for c in report_finale.columns if 'sprint' in c.lower()]
-            v_spr = float(report_finale[col_sprint].sum().sum()) if col_sprint else 0.0
+            c_sprint = [c for c in report_finale.columns if 'sprint' in c.lower()]
+            v_spr = float(report_finale[c_sprint].sum().sum()) if c_sprint else 0.0
             
             v_z2 = float(report_finale['z2 Stimati (m)'].sum()) if 'z2 Stimati (m)' in report_finale.columns else 0.0
             v_z3 = float(report_finale['z3 Stimati (m)'].sum()) if 'z3 Stimati (m)' in report_finale.columns else 0.0
             
-            col_acc = [c for c in report_finale.columns if 'accel' in c.lower()]
-            v_acc = float(report_finale[col_acc].sum().sum()) if col_acc else 0.0
+            c_acc = [c for c in report_finale.columns if 'accel' in c.lower()]
+            v_acc = float(report_finale[c_acc].sum().sum()) if c_acc else 0.0
             
-            col_dec = [c for c in report_finale.columns if 'decel' in c.lower()]
-            v_dec = float(report_finale[col_dec].sum().sum()) if col_dec else 0.0
+            c_dec = [c for c in report_finale.columns if 'decel' in c.lower()]
+            v_dec = float(report_finale[c_dec].sum().sum()) if c_dec else 0.0
             
-            col_bur = float(report_finale['Tot. burst'].sum()) if 'Tot. burst' in report_finale.columns else 0.0
-            col_brk = float(report_finale['Tot. breaks'].sum()) if 'Tot. breaks' in report_finale.columns else 0.0
+            c_bur = [c for c in report_finale.columns if 'burst' in c.lower()]
+            v_bur = float(report_finale[c_bur].sum().sum()) if c_bur else 0.0
+            
+            c_brk = [c for c in report_finale.columns if 'breaks' in c.lower()]
+            v_brk = float(report_finale[c_brk].sum().sum()) if c_brk else 0.0
 
             st.markdown(f"""
             <div class="metric-container">
@@ -124,14 +129,11 @@ if os.path.exists(FILE_AUTO):
             col_num = report_finale.select_dtypes(include=['number']).columns.tolist()
             formato_v = {c: "{:.0f}" for c in col_num}
             
-            config_colonne = {}
-            for col in report_finale.columns:
-                config_colonne[col] = st.column_config.Column(width="small")
-            
+            # 🛠️ AGGIORNAMENTO STRUTTURALE: Rimosse le larghezze fisse sulle colonne. 
+            # use_container_width=True adatta l'intera griglia allo schermo Honor riducendo gli spazi vuoti.
             st.dataframe(
                 report_finale.style.background_gradient(cmap="Blues", subset=col_num, axis=0).format(formato_v), 
-                use_container_width=True,
-                column_config=config_colonne
+                use_container_width=True
             )
             st.markdown("<div style='margin-top: 5px;'></div>", unsafe_allow_html=True)
             st.download_button(label="📥 SCARICA REPORT EXCEL UFFICIALE", data=report_finale.to_csv(index=False).encode('utf-8'), file_name='Report_Pisa_Oggi.csv', mime='text/csv')
