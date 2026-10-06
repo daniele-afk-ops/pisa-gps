@@ -120,14 +120,14 @@ if os.path.exists(FILE_AUTO):
             col_num = report_finale.select_dtypes(include=['number']).columns.tolist()
             formato_v = {c: "{:.0f}" for c in col_num}
             html_rows = ""
-            for idx, row in report_finale.iterrows():
-                row_html = f"<tr><td style='color: #111111 !important; font-weight: bold; background-color: #ffffff !important; text-align: left; padding-left: 8px;'>{row['Nome_Esercitazione']}</td><td style='color: #111111 !important; background-color: #ffffff !important;'>{row['Nuovi_Minuti']}</td><td style='color: #111111 !important; background-color: #ffffff !important;'>{row['Categoria']}</td>"
+              for idx, row in report_finale.iterrows():
+                row_html = f"<tr><td>{row['Nome_Esercitazione']}</td><td>{row['Nuovi_Minuti']}</td><td>{row['Categoria']}</td>"
                 for col in col_num:
                     if col != 'Nuovi_Minuti':
                         val = row[col]
                         max_v, min_v = report_finale[col].max(), report_finale[col].min()
-                        alpha = 0.15 + 0.5 * ((val - min_v) / (max_v - min_v)) if max_v != min_v else 0.2
-                        row_html += f"<td style='background-color: rgba(0, 82, 165, {alpha:.2f}) !important; font-weight: bold; color: #111111 !important;'>{val:.0f}</td>"
+                        alpha = 0.1 + 0.5 * ((val - min_v) / (max_v - min_v)) if max_v != min_v else 0.2
+                        row_html += f"<td style='background-color: rgba(0, 82, 165, {alpha:.2f}) !important;'>{val:.0f}</td>"
                 row_html += "</tr>"
                 html_rows += row_html
             headers_html = "<tr><th style='width: 15%;'>Nome Esercitazione</th><th style='width: 7%;'>Minuti</th><th style='width: 12%;'>Categoria</th>"
