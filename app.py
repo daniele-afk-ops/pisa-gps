@@ -14,11 +14,6 @@ st.markdown("""
     .metric-label { font-size: 0.65rem !important; font-weight: 700 !important; color: #475569 !important; text-transform: uppercase; }
     .metric-value { font-size: 1.05rem !important; font-weight: 800 !important; color: #0f172a !important; }
     .sidebar .sidebar-content { background-color: #002855; color: white; }
-    
-    /* Forza la tabella fissa a stringersi e andare a capo senza sbordare */
-    table { width: 100% !important; table-layout: auto !important; margin: 0px !important; }
-    th, td { font-size: 0.78rem !important; padding: 4px 6px !important; text-align: center !important; white-space: normal !important; word-break: break-word !important; }
-    th { background-color: #0052a5 !important; color: white !important; font-weight: bold !important; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -125,10 +120,22 @@ if os.path.exists(FILE_AUTO):
             """, unsafe_allow_html=True)
             
             st.write("### 📋 Tabella Complessiva Carico Fasi")
+            col_num = report_finale.select_dtypes(include=['number']).columns.tolist()
+            formato_v = {c: "{:.0f}" for c in col_num}
             
-            # Sostituiamo st.dataframe con st.table per formattare in modo fisso e rimuovere lo scroll orizzontale
-            st.table(report_finale.assign(**{c: report_finale[c].map(lambda x: f"{x:.0f}") for c in report_finale.select_dtypes(include=['number']).columns}))
+            # Confezioniamo le colonne con dimensioni bloccate per forzare l'allineamento orizzontale
+            config_colonne = {
+                'Nome_Esercitazione': st.column_config.Column(pinned=True, width="medium"),
+                'Categoria': st.column_config.Column(width="medium")
+            }
+            for col in col_num:
+                config_colonne[col] = st.column_config.Column(width="small")
             
+            st.dataframe(
+                report_finale.style.background_gradient(cmap="Blues", subset=col_num, axis=0).format(formato_v), 
+                use_container_width=True,
+                column_config=config_colonne
+            )
             st.markdown("<div style='margin-top: 5px;'></div>", unsafe_allow_html=True)
             st.download_button(label="📥 SCARICA REPORT EXCEL UFFICIALE", data=report_finale.to_csv(index=False).encode('utf-8'), file_name='Report_Pisa_Oggi.csv', mime='text/csv')
         else:
