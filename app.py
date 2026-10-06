@@ -75,6 +75,36 @@ if os.path.exists(FILE_AUTO):
             for col in report_finale.columns:
                 if col not in ['Nome_Esercitazione', 'Categoria']: report_finale[col] = pd.to_numeric(report_finale[col], errors='coerce').fillna(0).round(0).astype(int)
             st.write("### 📊 Riepilogo Carico Stimato Allenamento")
+             st.write("### 📐 Dimensioni Spazio di Gioco Odierno")
+            col_lung, col_larg = st.columns(2)
+            with col_lung:
+                lunghezza = st.slider("Lunghezza Campo (metri):", min_value=10, max_value=120, value=30, step=1)
+            with col_larg:
+                larghezza = st.slider("Larghezza Campo (metri):", min_value=10, max_value=90, value=20, step=1)
+            import re
+            tot_giocatori_rilevati = 0
+            for es in scelte_totali:
+                numeri = [int(s) for s in re.findall(r'\d+', str(es))]
+                tot_giocatori_rilevati += sum(numeri) if numeri else 10
+            if tot_giocatori_rilevati == 0: tot_giocatori_rilevati = 10
+            area_totale = lunghezza * larghezza
+            mq_giocatore = area_totale / tot_giocatori_rilevati
+            if mq_giocatore < 60:
+                focus = " SPAZIO STRETTO"
+            elif 60 <= mq_giocatore <= 90:
+                focus = "SPAZIO MEDIO"
+            else:
+                focus = "SPAZIO AMPIO "
+            st.markdown(f"""
+            <div style="background-color: #002855; color: white; padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 6px solid #0052a5;">
+                <b>📊 ANALISI DELLA DENSITÀ DI ALLENAMENTO:</b><br>
+                • Giocatori totali stimati dalle attività: <b>{tot_giocatori_rilevati}</b> calciatori<br>
+                • Area totale calpestabile: <b>{area_totale} m²</b><br>
+                • Spazio utile individuale: <b>{mq_giocatore:.1f} m² per giocatore</b><br><br>
+                🎯 <b>{focus_atletico}</b>
+            </div>
+            """, unsafe_allow_html=True)
+
             v_vol = int(report_finale['Nuovi_Minuti'].sum())
             v_dist = int(report_finale['total dist. Stimati (m)'].sum())
             col_sprint = [c for c in report_finale.columns if 'sprint' in c.lower()]
