@@ -69,7 +69,7 @@ if os.path.exists(FILE_AUTO):
                     minuti = st.number_input(f"🏃 {es} (min)", min_value=1, max_value=120, value=15, key=f"m_{es}")
                     id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values
                     if len(id_es) > 0:
-                        programma.append({'Esercitazione_ID': str(id_es[0]), 'Nuovi_Minuti': minuti})
+                        programma.append({'Esercitazione_ID': str(id_es), 'Nuovi_Minuti': minuti})
                     
             df_prog = pd.DataFrame(programma)
             rep = pd.merge(df_prog, db_completo, on='Esercitazione_ID')
@@ -102,9 +102,13 @@ if os.path.exists(FILE_AUTO):
             col_dec = [c for c in report_finale.columns if 'decel' in c.lower()]
             v_dec = float(report_finale[col_dec].sum().sum()) if col_dec else 0.0
             
-            col_bur = float(report_finale['Tot. burst'].sum()) if 'Tot. burst' in report_finale.columns else 0.0
-            col_brk = float(report_finale['Tot. breaks'].sum()) if 'Tot. breaks' in report_finale.columns else 0.0
+            col_bur = [c for c in report_finale.columns if 'burst' in c.lower()]
+            v_bur = float(report_finale[col_bur].sum().sum()) if col_bur else 0.0
+            
+            col_brk = [c for c in report_finale.columns if 'breaks' in c.lower()]
+            v_brk = float(report_finale[col_brk].sum().sum()) if col_brk else 0.0
 
+            # 🛠️ FIX DEFINITIVO REFUSI: allineati i nomi v_bur e v_brk senza errori di battitura
             st.markdown(f"""
             <div class="metric-container">
                 <div class="metric-card"><div class="metric-label">⏱️ Volume Totale</div><div class="metric-value">{v_vol:.0f} min</div></div>
