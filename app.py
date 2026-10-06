@@ -88,7 +88,7 @@ if os.path.exists(FILE_AUTO):
             for col in report_finale.columns:
                 if col not in ['Nome_Esercitazione', 'Categoria']: report_finale[col] = pd.to_numeric(report_finale[col], errors='coerce').fillna(0).round(0).astype(int)
                 
-            st.write("### 📊 Riepilogo Carico Stimato Allenamento")
+            st.write("### 📊 Carico Stimato Allenamento")
             v_vol = int(report_finale['Nuovi_Minuti'].sum())
             v_dist = int(report_finale['total dist. Stimati (m)'].sum())
             col_sprint = [c for c in report_finale.columns if 'sprint' in c.lower()]
