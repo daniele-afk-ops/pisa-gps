@@ -67,9 +67,8 @@ if os.path.exists(FILE_AUTO):
             for i, es in enumerate(scelte_totali):
                 with cols_m[i]:
                     minuti = st.number_input(f"🏃 {es} (min)", min_value=1, max_value=120, value=15, key=f"m_{es}")
-                    id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values
-                    if len(id_es) > 0:
-                        programma.append({'Esercitazione_ID': str(id_es), 'Nuovi_Minuti': minuti})
+                    id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values[0]
+                    programma.append({'Esercitazione_ID': str(id_es), 'Nuovi_Minuti': minuti})
                     
             df_prog = pd.DataFrame(programma)
             rep = pd.merge(df_prog, db_completo, on='Esercitazione_ID')
@@ -87,35 +86,35 @@ if os.path.exists(FILE_AUTO):
                     report_finale[col] = pd.to_numeric(report_finale[col], errors='coerce').fillna(0).round(0).astype(int)
                     
             st.write("### 📊 Riepilogo Carico Stimato Allenamento")
-            v_vol = report_finale['Nuovi_Minuti'].sum()
-            v_dist = report_finale['total dist. Stimati (m)'].sum()
+            v_vol = int(report_finale['Nuovi_Minuti'].sum())
+            v_dist = int(report_finale['total dist. Stimati (m)'].sum())
             
             col_sprint = [c for c in report_finale.columns if 'sprint' in c.lower()]
-            v_spr = report_finale[col_sprint].sum().sum() if col_sprint else 0.0
+            v_spr = int(report_finale[col_sprint].sum().sum()) if col_sprint else 0
             
-            v_z2 = report_finale['z2 Stimati (m)'].sum() if 'z2 Stimati (m)' in report_finale.columns else 0.0
-            v_z3 = report_finale['z3 Stimati (m)'].sum() if 'z3 Stimati (m)' in report_finale.columns else 0.0
+            v_z2 = int(report_finale['z2 Stimati (m)'].sum()) if 'z2 Stimati (m)' in report_finale.columns else 0
+            v_z3 = int(report_finale['z3 Stimati (m)'].sum()) if 'z3 Stimati (m)' in report_finale.columns else 0
             
             col_acc = [c for c in report_finale.columns if 'accel' in c.lower()]
-            v_acc = report_finale[col_acc].sum().sum() if col_acc else 0.0
+            v_acc = int(report_finale[col_acc].sum().sum()) if col_acc else 0
             
             col_dec = [c for c in report_finale.columns if 'decel' in c.lower()]
-            v_dec = report_finale[col_dec].sum().sum() if col_dec else 0.0
+            v_dec = int(report_finale[col_dec].sum().sum()) if col_dec else 0
             
-            col_bur = report_finale['Tot. burst'].sum() if 'Tot. burst' in report_finale.columns else 0.0
-            col_brk = report_finale['Tot. breaks'].sum() if 'Tot. breaks' in report_finale.columns else 0.0
+            col_bur = int(report_finale['Tot. burst'].sum()) if 'Tot. burst' in report_finale.columns else 0
+            col_brk = int(report_finale['Tot. breaks'].sum()) if 'Tot. breaks' in report_finale.columns else 0
 
             st.markdown(f"""
             <div class="metric-container">
-                <div class="metric-card"><div class="metric-label">⏱️ Volume Totale</div><div class="metric-value">{v_vol:.0f} min</div></div>
-                <div class="metric-card"><div class="metric-label">🏃 Distanza Totale</div><div class="metric-value">{v_dist:.0f} m</div></div>
-                <div class="metric-card"><div class="metric-label">⚡ Sprint Totali</div><div class="metric-value">{v_spr:.0f}</div></div>
-                <div class="metric-card"><div class="metric-label">🏃‍♂️ Zona 2 Totale</div><div class="metric-value">{v_z2:.0f} m</div></div>
-                <div class="metric-card"><div class="metric-label">🔥 Zona 3 Totale</div><div class="metric-value">{v_z3:.0f} m</div></div>
-                <div class="metric-card"><div class="metric-label">📈 Accelerazioni</div><div class="metric-value">{v_acc:.0f}</div></div>
-                <div class="metric-card"><div class="metric-label">📉 Decelerazioni</div><div class="metric-value">{v_dec:.0f}</div></div>
-                <div class="metric-card"><div class="metric-label">💥 Burst Totali</div><div class="metric-value">{col_bur:.0f}</div></div>
-                <div class="metric-card"><div class="metric-label">🛑 Breaks Totali</div><div class="metric-value">{col_brk:.0f}</div></div>
+                <div class="metric-card"><div class="metric-label">⏱️ Volume Totale</div><div class="metric-value">{v_vol} min</div></div>
+                <div class="metric-card"><div class="metric-label">🏃 Distanza Totale</div><div class="metric-value">{v_dist} m</div></div>
+                <div class="metric-card"><div class="metric-label">⚡ Sprint Totali</div><div class="metric-value">{v_spr}</div></div>
+                <div class="metric-card"><div class="metric-label">🏃‍♂️ Zona 2 Totale</div><div class="metric-value">{v_z2} m</div></div>
+                <div class="metric-card"><div class="metric-label">🔥 Zona 3 Totale</div><div class="metric-value">{v_z3} m</div></div>
+                <div class="metric-card"><div class="metric-label">📈 Accelerazioni</div><div class="metric-value">{v_acc}</div></div>
+                <div class="metric-card"><div class="metric-label">📉 Decelerazioni</div><div class="metric-value">{v_dec}</div></div>
+                <div class="metric-card"><div class="metric-label">💥 Burst Totali</div><div class="metric-value">{v_bur}</div></div>
+                <div class="metric-card"><div class="metric-label">🛑 Breaks Totali</div><div class="metric-value">{v_brk}</div></div>
             </div>
             """, unsafe_allow_html=True)
             
@@ -123,7 +122,6 @@ if os.path.exists(FILE_AUTO):
             col_num = report_finale.select_dtypes(include=['number']).columns.tolist()
             formato_v = {c: "{:.0f}" for c in col_num}
             
-            # 🛠️ UNICA MODIFICA EFFETTUATA: Allarghiamo a "large" la casella dei nomi e categorie così da leggerli interamente.
             config_colonne = {
                 'Nome_Esercitazione': st.column_config.Column(pinned=True, width="large"),
                 'Categoria': st.column_config.Column(width="large")
