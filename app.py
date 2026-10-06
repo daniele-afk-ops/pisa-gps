@@ -5,29 +5,63 @@ import os
 # Configurazione della pagina e tema scuro/sportivo
 st.set_page_config(page_title="Pisa SC - GPS Load Planner", layout="wide")
 
-# 🔵⚫ STILE GRAFICO PERSONALIZZATO (Font ridotti per 9 metriche in linea)
+# 🔵⚫ RESET E DESIGN VISIVO AVANZATO (Card grandi, spaziate e non schiacciate)
 st.markdown("""
     <style>
-    .main { background-color: #f5f7fa; }
-    .stMetric { background-color: #ffffff; padding: 8px 3px; border-radius: 6px; border-left: 3px solid #0052a5; box-shadow: 0 1px 3px rgba(0,0,0,0.05); text-align: center; }
-    .stMetric label { font-size: 0.65rem !important; font-weight: 700; color: #002855; white-space: nowrap; }
-    .stMetric .st-c2 { font-size: 0.95rem !important; font-weight: 800; color: #111111; }
-    h1 { color: #002855; font-weight: 800; }
-    h3 { color: #0052a5; }
+    .main { background-color: #f8fafc; padding: 20px; }
+    h1 { color: #002855; font-weight: 800; font-size: 2.2rem; }
+    h3 { color: #0052a5; font-weight: 700; margin-top: 25px; }
+    
+    /* Griglia contenitore per dare respiro */
+    .metric-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 25px;
+        margin-top: 15px;
+        margin-bottom: 25px;
+    }
+    
+    /* Card atletica spaziosa ed elegante */
+    .metric-card {
+        background-color: #ffffff;
+        padding: 25px 20px;
+        border-radius: 12px;
+        border-left: 6px solid #0052a5;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+        transition: transform 0.2s;
+    }
+    .metric-card:hover {
+        transform: translateY(-2px);
+    }
+    .metric-label {
+        font-size: 0.85rem !important;
+        font-weight: 700 !important;
+        color: #475569 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+    .metric-value {
+        font-size: 1.8rem !important;
+        font-weight: 800 !important;
+        color: #0f172a !important;
+        line-height: 1;
+    }
+    
     .sidebar .sidebar-content { background-color: #002855; color: white; }
     </style>
 """, unsafe_allow_html=True)
 
 # 📊 CONFIGURAZIONE INTESTAZIONE
-col_logo, col_titolo = st.columns(2)
+col_logo, col_titolo = st.columns([1, 6])
 with col_logo:
     if os.path.exists("stemma_pisa.png"):
-        st.image("stemma_pisa.png", width=120)
+        st.image("stemma_pisa.png", width=110)
 with col_titolo:
     st.title("🔵⚫ PISA SPORTING CLUB")
-    st.subheader("Performance & Analytics — Pianificazione Seduta")
+    st.subheader("Performance & Analytics — Pianificazione Carico Atletico")
 
-st.markdown("<hr style='border-top: 3px solid #002855;'>", unsafe_allow_html=True)
+st.markdown("<hr style='border-top: 3px solid #002855; margin-bottom: 20px;'>", unsafe_allow_html=True)
 
 # 📂 CARICAMENTO AUTOMATICO DEL FILE DA GITHUB
 FILE_AUTO = "database_gps.xlsx"
@@ -51,7 +85,6 @@ if os.path.exists(FILE_AUTO):
                 df_gps_min[col] = pd.to_numeric(df_gps_totali[col], errors='coerce') / pd.to_numeric(df_gps_totali['minuti'], errors='coerce')
         
         db_completo = pd.merge(df_esercizi, df_gps_min, on='Esercitazione_ID')
-        
         db_completo['Categoria_Pulita'] = db_completo['Categoria'].astype(str).str.replace('*', '', regex=False).str.strip()
         
         # 📋 INTERFACCIA BARRA LATERALE
@@ -87,7 +120,7 @@ if os.path.exists(FILE_AUTO):
         
         if scelte_totali:
             programma = []
-            st.write("### ⏱️ Volume di Lavoro (Inserisci la durata di ogni fase)")
+            st.write("### ⏱️ Volume di Lavoro (Durata in minuti)")
             
             cols_minuti = st.columns(len(scelte_totali))
             for i, es in enumerate(scelte_totali):
@@ -95,8 +128,7 @@ if os.path.exists(FILE_AUTO):
                     minuti = st.number_input(f"🏃 {es} (min)", min_value=1, max_value=120, value=15, key=f"min_{es}")
                     id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values
                     if len(id_es) > 0:
-                        # 🛠️ FIX ERRORE: cambiato 'minuti' in 'minuti'
-                        programma.append({'Esercitazione_ID': str(id_es[0]), 'Nuovi_Minuti': minuti})
+                        programma.append({'Esercitazione_ID': str(id_es), 'Nuovi_Minuti': minuti})
             
             df_programma = pd.DataFrame(programma)
             report_stimato = pd.merge(df_programma, db_completo, on='Esercitazione_ID')
@@ -105,44 +137,51 @@ if os.path.exists(FILE_AUTO):
                 if col in df_gps_totali.columns:
                     nome_col = col.replace('(m)', 'Stimati (m)').replace('n°', 'Tot.').strip()
                     report_stimato[nome_col] = report_stimato[col] * report_stimato['Nuovi_Minuti']
-                    
-                    if 'sprint' in nome_col or 'breaks' in nome_col or 'burst' in nome_col:
-                        report_stimato[nome_col] = report_stimato[nome_col].round(1)
-                    else:
-                        report_stimato[nome_col] = report_stimato[nome_col].round(0).astype(int)
-                
+            
             colonne_finali = ['Nome_Esercitazione', 'Nuovi_Minuti', 'Categoria'] + [col.replace('(m)', 'Stimati (m)').replace('n°', 'Tot.').strip() for col in colonne_gps if col in df_gps_totali.columns]
-            report_finale = report_stimato[colonne_finali]
+            report_finale = report_stimato[colonne_finali].copy()
             
-            # 📊 RIEPILOGO COMPATTO - 9 COLONNE ALLINEATE IN UNA SOLA RIGA
-            st.write("### 📊 RIEPILOGO CARICO STIMATO ALLENAMENTO")
+            # ARROTONDAMENTO COMPLETO PER CORREGGERE LE VIRGOLE NELLA TABELLA
+            for col in report_finale.columns:
+                if report_finale[col].dtype in ['float64', 'int64']:
+                    if 'sprint' in col.lower() or 'breaks' in col.lower() or 'burst' in col.lower():
+                        report_finale[col] = report_finale[col].round(1)
+                    elif 'minuti' not in col.lower():
+                        report_finale[col] = report_finale[col].round(0).astype(int)
             
-            tot_cols = st.columns(9)
-            tot_cols[0].metric("⏱️ VOL. TOTALE", f"{int(report_finale['Nuovi_Minuti'].sum())} m'")
-            tot_cols[1].metric("🏃 DIST. TOTALE", f"{int(report_finale['total dist. Stimati (m)'].sum())} m")
-            if 'Tot. sprint' in report_finale.columns:
-                tot_cols[2].metric("⚡ TOT. SPRINT", f"{report_finale['Tot. sprint'].sum():.1f}")
-            if 'z2 Stimati (m)' in report_finale.columns:
-                tot_cols[3].metric("🏃‍♂️ ZONA 2 TOT.", f"{int(report_finale['z2 Stimati (m)'].sum())} m")
-            if 'z3 Stimati (m)' in report_finale.columns:
-                tot_cols[4].metric("🔥 ZONA 3 TOT.", f"{int(report_finale['z3 Stimati (m)'].sum())} m")
-            if 'Tot. accel.' in report_finale.columns:
-                tot_cols[5].metric("📈 ACCEL. TOT.", f"{int(report_finale['Tot. accel.'].sum())}")
-            if 'Tot. decel.' in report_finale.columns:
-                tot_cols[6].metric("📉 DECEL. TOT.", f"{int(report_finale['Tot. decel.'].sum())}")
-            if 'Tot. burst' in report_finale.columns:
-                tot_cols[7].metric("💥 BURST TOT.", f"{report_finale['Tot. burst'].sum():.1f}")
-            if 'Tot. breaks' in report_finale.columns:
-                tot_cols[8].metric("🛑 BREAKS TOT.", f"{report_finale['Tot. breaks'].sum():.1f}")
+            # 📊 RIEPILOGO CARICO STIMATO - HTML PERSONALIZZATO SPAZIOSO (3x3 Grid)
+            st.write("### 📊 Riepilogo Carico Stimato Allenamento")
             
-            st.markdown("<br>", unsafe_allow_html=True)
+            # Estrazione valori totali sommati per i blocchi grafici
+            v_vol = int(report_finale['Nuovi_Minuti'].sum())
+            v_dist = int(report_finale['total dist. Stimati (m)'].sum())
+            v_spr = report_finale['Tot. sprint'].sum() if 'Tot. sprint' in report_finale.columns else 0.0
+            v_z2 = int(report_finale['z2 Stimati (m)'].sum()) if 'z2 Stimati (m)' in report_finale.columns else 0
+            v_z3 = int(report_finale['z3 Stimati (m)'].sum()) if 'z3 Stimati (m)' in report_finale.columns else 0
+            v_acc = int(report_finale['Tot. accel.'].sum()) if 'Tot. accel.' in report_finale.columns else 0
+            v_dec = int(report_finale['Tot. decel.'].sum()) if 'Tot. decel.' in report_finale.columns else 0
+            v_bur = report_finale['Tot. burst'].sum() if 'Tot. burst' in report_finale.columns else 0.0
+            v_brk = report_finale['Tot. breaks'].sum() if 'Tot. breaks' in report_finale.columns else 0.0
+
+            st.markdown(f"""
+            <div class="metric-container">
+                <div class="metric-card"><div class="metric-label">⏱️ Volume Totale Seduta</div><div class="metric-value">{v_vol} min</div></div>
+                <div class="metric-card"><div class="metric-left"></div><div class="metric-label">🏃 Distanza Complessiva</div><div class="metric-value">{v_dist} m</div></div>
+                <div class="metric-card"><div class="metric-label">⚡ Sprint Complessivi</div><div class="metric-value">{v_spr:.1f}</div></div>
+                <div class="metric-card"><div class="metric-label">🏃‍♂️ Corsa in Zona 2</div><div class="metric-value">{v_z2} m</div></div>
+                <div class="metric-card"><div class="metric-label">🔥 Corsa in Zona 3</div><div class="metric-value">{v_z3} m</div></div>
+                <div class="metric-card"><div class="metric-label">📈 Accelerazioni Totali</div><div class="metric-value">{v_acc}</div></div>
+                <div class="metric-card"><div class="metric-label">📉 Decelerazioni Totali</div><div class="metric-value">{v_dec}</div></div>
+                <div class="metric-card"><div class="metric-label">💥 Burst Totali</div><div class="metric-value">{v_bur:.1f}</div></div>
+                <div class="metric-card"><div class="metric-label">🛑 Breaks Totali</div><div class="metric-value">{v_brk:.1f}</div></div>
+            </div>
+            """, unsafe_allow_html=True)
             
-            # 📋 TABELLA CON BLU INDIPENDENTE PER OGNI COLONNA NUMERICA
-            st.write("### 📋 TABELLA COMPLESSIVA SUL CARICO DELLE FASI")
+            # 📋 TABELLA COMPLESSIVA
+            st.write("### 📋 Tabella Complessiva sul Carico delle Fasi")
             colonne_numeriche = report_finale.select_dtypes(include=['number']).columns.tolist()
             
-            # L'asse 0 (axis=0) applica il colore blu evidenziando il massimo valore di ogni colonna in verticale
-            st.dataframe(report_finale.style.background_gradient(cmap="Blues", subset=colonne_numeriche, axis=0))
+            st.dataframe(report_finale.style.background_gradient(cmap="Blues", subset=colonne_numeriche, axis=0), use_container_width=True)
             
             st.markdown("<br>", unsafe_allow_html=True)
             st.download_button(
@@ -156,4 +195,3 @@ if os.path.exists(FILE_AUTO):
     except Exception as e:
         st.error(f"Errore nell'elaborazione del file automatico: {e}")
 else:
-    st.info("ℹ️ Carica il tuo file database_gps.xlsx su GitHub per attivare la lettura automatica.")
