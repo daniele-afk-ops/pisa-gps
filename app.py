@@ -55,7 +55,7 @@ if os.path.exists(FILE_AUTO):
                 if s_cat: scelte_totali.extend(s_cat)
         if scelte_totali:
             programma = []
-            st.write("### ⏱️ Volume & Spazio di Lavoro Fasi")
+            st.write("### ⏱️ Volume & Spazio di Lavoro")
             
             # Griglia orizzontale ripristinata e pulita
             for es in scelte_totali:
@@ -116,7 +116,7 @@ if os.path.exists(FILE_AUTO):
                 <div class="metric-card"><div class="metric-label">🛑 Breaks Totali</div><div class="metric-value">{v_brk_val}</div></div>
             </div>
             """, unsafe_allow_html=True)
-            st.write("### 📋 Tabella Complessiva Carico Fasi")
+            st.write("### 📋 Tabella Complessiva Carico")
             col_num = report_finale.select_dtypes(include=['number']).columns.tolist()
             formato_v = {c: "{:.0f}" for c in col_num}
             html_rows = ""
