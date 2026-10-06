@@ -111,11 +111,12 @@ if os.path.exists(FILE_AUTO):
                     if col != 'Nuovi_Minuti':
                         val = row[col]
                         max_v, min_v = report_finale[col].max(), report_finale[col].min()
-                        if max_v == min_v: bg, fw, tc = "rgba(255,255,255,1)", "normal", "#111111"
-                        elif val == max_v: bg, fw, tc = "rgba(0,82,165,0.85)", "800", "#ffffff"
-                        elif val == min_v: bg, fw, tc = "rgba(255,255,255,1)", "normal", "#111111"
-                        else: bg, fw, tc = "rgba(173,216,230,0.6)", "600", "#002855"
-                        row_html += f"<td style='background-color: {bg}; font-weight: {fw}; color: {tc} !important;'>{val:.0f}</td>"
+                         if max_v != min_v:
+                            alpha = 0.1 + 0.5 * ((val - min_v) / (max_v - min_v))
+                        else:
+                            alpha = 0.2
+                        bg_style = f"style='background-color: rgba(0, 82, 165, {alpha:.2f}); font-weight: 500; color: #111111 !important;'"
+                        row_html += f"<td {bg_style}>{val:.0f}</td>"
                 row_html += "</tr>"
                 html_rows += row_html
             headers_html = "<tr><th style='width: 15%;'>Nome Esercitazione</th><th style='width: 7%;'>Minuti</th><th style='width: 12%;'>Categoria</th>"
