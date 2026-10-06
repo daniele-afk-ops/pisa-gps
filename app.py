@@ -50,13 +50,13 @@ if os.path.exists(FILE_AUTO):
         
         db_completo = pd.merge(df_esercizi, df_gps_min, on='Esercitazione_ID')
         
-        # Pulizia dei nomi delle categorie per evitare problemi con spazi o asterischi sfuggiti su Excel
+        # Pulizia dei nomi delle categorie per evitare problemi con spazi o asterischi
         db_completo['Categoria_Pulita'] = db_completo['Categoria'].astype(str).str.replace('*', '', regex=False).str.strip()
         
         # 📋 INTERFACCIA BARRA LATERALE ORDINATA SECONDO LE TUE DIRETTIVE
         st.sidebar.markdown("## 📋 CATEGORIE ALLENAMENTO")
         
-        # ORDINE CRONOLOGICO AGGIORNATO (CON LA VOCE PARTITA IN FONDO)
+        # ORDINE CRONOLOGICO AGGIORNATO CON LA VOCE PARTITA
         ordine_cronologico = [
             "Attivazione",
             "tecnico-tattica", 
@@ -84,8 +84,8 @@ if os.path.exists(FILE_AUTO):
                     key=f"sel_{cat_ordine.lower()}", 
                     label_visibility="collapsed"
                 )
-                if choices_cat := scelte_cat:
-                    scelte_totali.extend(choices_cat)
+                if scelte_cat:
+                    scelte_totali.extend(scelte_cat)
         
         if scelte_totali:
             programma = []
