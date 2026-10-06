@@ -1,11 +1,12 @@
 import streamlit as st
 import pandas as pd
-import os, re
-st.set_page_config(page_title="Pisa SC", layout="wide")
-st.markdown("""<style>
+import os
+st.set_page_config(page_title="Pisa SC - GPS Load Planner", layout="wide")
+st.markdown("""
+    <style>
     .main { background-color: #f8fafc; padding: 5px 20px !important; }
     h1 { color: #002855; font-weight: 800; font-size: 1.5rem; margin: 0 !important; }
-    h3 { color: #0052a5; font-weight: 700; font-size: 1rem; margin: 5px 0 2px 0; }
+    h3 { color: #0052a5; font-weight: 700; font-size: 1rem; margin-top: 5px !important; margin-bottom: 2px !important; }
     .metric-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 5px 0 8px 0; }
     .metric-card { background-color: #ffffff; padding: 6px 12px; border-radius: 6px; border-left: 4px solid #0052a5; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
     .metric-label { font-size: 0.65rem !important; font-weight: 700 !important; color: #475569 !important; text-transform: uppercase; }
@@ -15,11 +16,15 @@ st.markdown("""<style>
     .pisa-table { width: 100% !important; border-collapse: collapse !important; table-layout: fixed !important; }
     .pisa-table th, .pisa-table td { font-size: 0.72rem !important; padding: 4px 3px !important; text-align: center !important; white-space: normal !important; word-break: break-word !important; border: 1px solid #e2e8f0 !important; }
     .pisa-table th { background-color: #0052a5 !important; color: white !important; font-weight: bold !important; }
-    .m-box { background-color: #002855; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.75rem; margin-top: 5px; }
-</style>""", unsafe_allow_html=True)
-if os.path.exists("stemma_pisa.png"): st.image("stemma_pisa.png", width=130)
-st.title("🔵⚫ PISA SPORTING CLUB")
-st.subheader("Performance & Analytics")
+    </style>
+""", unsafe_allow_html=True)
+col_l, col_t = st.columns(2)
+with col_l:
+    if os.path.exists("stemma_pisa.png"): st.image("stemma_pisa.png", width=130)
+with col_t:
+    st.title("🔵⚫ PISA SPORTING CLUB")
+    st.subheader("Performance & Analytics")
+st.markdown("<hr style='border-top: 2px solid #002855;'>", unsafe_allow_html=True)
 FILE_AUTO = "database_gps.xlsx"
 if os.path.exists(FILE_AUTO):
     try:
@@ -51,29 +56,38 @@ if os.path.exists(FILE_AUTO):
         if scelte_totali:
             programma = []
             st.write("### ⏱️ Volume & Spazio di Lavoro Fasi")
-            cols_m = st.columns(len(scelte_totali))
-            for i, es in enumerate(scelte_totali):
-                with cols_m[i]:
-                    minuti = st.number_input(f"🏃 {es} (min)", min_value=1, max_value=120, value=15, key=f"m_{es}")
-                    lunghezza = st.number_input(f"📐 Lungh. {es} (m)", min_value=5, max_value=120, value=30, key=f"lu_{es}")
-                    larghezza = st.number_input(f"📐 Largh. {es} (m)", min_value=5, max_value=90, value=20, key=f"la_{es}")
-                    numeri_g = [int(s) for s in re.findall(r'\d+', str(es))]
-                    giocatori_fase = sum(numeri_g) if numeri_g else 10
-                    if giocatori_fase == 0: giocatori_fase = 10
-                    mq_fase = (lunghezza * larghezza) / giocatori_fase
-                    st.markdown(f'<div class="m-box">👥 Giocatori: <b>{giocatori_fase}</b><br>📐 Spazio: <b>{mq_fase:.1f} m²/gioc.</b></div>', unsafe_allow_html=True)
-                    id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values
-                    if len(id_es) > 0: programma.append({'Esercitazione_ID': str(id_es[0]), 'Nuovi_Minuti': minuti})
+            
+            # Griglia orizzontale ripristinata e pulita
+            for es in scelte_totali:
+                st.markdown(f"#### 🏃 {es}")
+                c1, c2, c3, c4 = st.columns(4)
+                with c1: minuti = st.number_input("Durata (min):", min_value=1, max_value=120, value=15, key=f"m_{es}")
+                with c2: lunghezza = st.number_input("Lunghezza (m):", min_value=5, max_value=120, value=30, key=f"lu_{es}")
+                with c3: larghezza = st.number_input("Larghezza (m):", min_value=5, max_value=90, value=20, key=f"la_{es}")
+                with c4: giocatori = st.number_input("N° Giocatori odierni:", min_value=1, max_value=30, value=10, key=f"gi_{es}")
+                
+                area_fase = lunghezza * larghezza
+                mq_fase = area_fase / giocatori
+                st.markdown(f"""
+                <div style="background-color: #002855; color: white; padding: 6px 12px; border-radius: 4px; font-size: 0.78rem; margin: -5px 0 15px 0; border-left: 4px solid #0052a5;">
+                    📐 Area Fase: <b>{area_fase} m²</b> | 👥 Densità: <b>{mq_fase:.1f} m²/giocatore</b>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values
+                if len(id_es) > 0: programma.append({'Esercitazione_ID': str(id_es[0]), 'Nuovi_Minuti': minuti})
+                
             df_prog = pd.DataFrame(programma)
             rep = pd.merge(df_prog, db_completo, on='Esercitazione_ID')
             for col in colonne_gps:
                 if col in df_gps.columns:
-                    n_col = col.replace('(m)', 'Stimati (m)').replace('n°', 'Tot.').replace('total dist.', 'total dist. Stimati').replace('z2', 'z2 Stimati').replace('z3', 'z3 Stimati').strip()
+                    n_col = col.replace('(m)', 'Stimati (m)').replace('n°', 'Tot.').strip()
                     rep[n_col] = rep[col] * rep['Nuovi_Minuti']
-            c_finali = ['Nome_Esercitazione', 'Nuovi_Minuti', 'Categoria'] + [col.replace('(m)', 'Stimati (m)').replace('n°', 'Tot.').replace('total dist.', 'total dist. Stimati').replace('z2', 'z2 Stimati').replace('z3', 'z3 Stimati').strip() for col in colonne_gps if col in df_gps.columns]
+            c_finali = ['Nome_Esercitazione', 'Nuovi_Minuti', 'Categoria'] + [col.replace('(m)', 'Stimati (m)').replace('n°', 'Tot.').strip() for col in colonne_gps if col in df_gps.columns]
             report_finale = rep[c_finali].copy()
             for col in report_finale.columns:
                 if col not in ['Nome_Esercitazione', 'Categoria']: report_finale[col] = pd.to_numeric(report_finale[col], errors='coerce').fillna(0).round(0).astype(int)
+                
             st.write("### 📊 Riepilogo Carico Stimato Allenamento")
             v_vol = int(report_finale['Nuovi_Minuti'].sum())
             v_dist = int(report_finale['total dist. Stimati (m)'].sum())
@@ -89,8 +103,9 @@ if os.path.exists(FILE_AUTO):
             v_bur_val = int(report_finale[col_bur].sum().sum()) if col_bur else 0
             col_brk = [c for c in report_finale.columns if 'breaks' in c.lower()]
             v_brk_val = int(report_finale[col_brk].sum().sum()) if col_brk else 0
-            st.markdown(f"""<div class="metric-container">
-                <div class="metric-card"><div class="metric-label">⏱ Volume Totale</div><div class="metric-value">{v_vol} min</div></div>
+            st.markdown(f"""
+            <div class="metric-container">
+                <div class="metric-card"><div class="metric-label">⏱️ Volume Totale</div><div class="metric-value">{v_vol} min</div></div>
                 <div class="metric-card"><div class="metric-label">🏃 Distanza Totale</div><div class="metric-value">{v_dist} m</div></div>
                 <div class="metric-card"><div class="metric-label">⚡ Sprint Totali</div><div class="metric-value">{v_spr}</div></div>
                 <div class="metric-card"><div class="metric-label">🏃‍♂️ Zona 2 Totale</div><div class="metric-value">{v_z2} m</div></div>
@@ -99,7 +114,8 @@ if os.path.exists(FILE_AUTO):
                 <div class="metric-card"><div class="metric-label">📉 Decelerazioni</div><div class="metric-value">{v_dec}</div></div>
                 <div class="metric-card"><div class="metric-label">💥 Burst Totali</div><div class="metric-value">{v_bur_val}</div></div>
                 <div class="metric-card"><div class="metric-label">🛑 Breaks Totali</div><div class="metric-value">{v_brk_val}</div></div>
-            </div>""", unsafe_allow_html=True)
+            </div>
+            """, unsafe_allow_html=True)
             st.write("### 📋 Tabella Complessiva Carico Fasi")
             col_num = report_finale.select_dtypes(include=['number']).columns.tolist()
             formato_v = {c: "{:.0f}" for c in col_num}
