@@ -117,8 +117,8 @@ if os.path.exists(FILE_AUTO):
                 html_rows += row_html
             headers_html = "<tr><th style='width: 15%;'>Nome Esercitazione</th><th style='width: 7%;'>Minuti</th><th style='width: 12%;'>Categoria</th>"
             for col in col_num:
-                if col != 'Nuovi_Minuti': 
-                    nome_pulito = col.replace('z2', 'z2 Stimati').replace('z3', 'z3 Stimati')
+                 if col != 'Nuovi_Minuti':
+                    nome_pulito = col.replace('z2', 'z2 Stimati').replace('z3', 'z3 Stimati').replace('Tot. sprint', 'Sprint Stimati').replace('Tot. accel.', 'Accel. Stimati').replace('Tot. decel.', 'Decel. Stimati').replace('Tot. burst', 'Burst Stimati').replace('Tot. breaks', 'Breaks Stimati')
                     headers_html += f"<th>{nome_pulito}</th>"
             headers_html += "</tr>"
             st.markdown(f'<div class="t-container"><table class="pisa-table"><thead>{headers_html}</thead><tbody>{html_rows}</tbody></table></div>', unsafe_allow_html=True)
