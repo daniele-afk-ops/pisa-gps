@@ -28,10 +28,6 @@ st.markdown("""
         border-radius: 12px;
         border-left: 6px solid #0052a5;
         box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
-        transition: transform 0.2s;
-    }
-    .metric-card:hover {
-        transform: translateY(-2px);
     }
     .metric-label {
         font-size: 0.85rem !important;
@@ -53,7 +49,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # 📊 CONFIGURAZIONE INTESTAZIONE
-col_logo, col_titolo = st.columns([1, 6])
+col_logo, col_titolo = st.columns(2)
 with col_logo:
     if os.path.exists("stemma_pisa.png"):
         st.image("stemma_pisa.png", width=110)
@@ -128,7 +124,7 @@ if os.path.exists(FILE_AUTO):
                     minuti = st.number_input(f"🏃 {es} (min)", min_value=1, max_value=120, value=15, key=f"min_{es}")
                     id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values
                     if len(id_es) > 0:
-                        programma.append({'Esercitazione_ID': str(id_es), 'Nuovi_Minuti': minuti})
+                        programma.append({'Esercitazione_ID': str(id_es[0]), 'Nuovi_Minuti': minuti})
             
             df_programma = pd.DataFrame(programma)
             report_stimato = pd.merge(df_programma, db_completo, on='Esercitazione_ID')
@@ -152,7 +148,6 @@ if os.path.exists(FILE_AUTO):
             # 📊 RIEPILOGO CARICO STIMATO - HTML PERSONALIZZATO SPAZIOSO (3x3 Grid)
             st.write("### 📊 Riepilogo Carico Stimato Allenamento")
             
-            # Estrazione valori totali sommati per i blocchi grafici
             v_vol = int(report_finale['Nuovi_Minuti'].sum())
             v_dist = int(report_finale['total dist. Stimati (m)'].sum())
             v_spr = report_finale['Tot. sprint'].sum() if 'Tot. sprint' in report_finale.columns else 0.0
@@ -166,7 +161,7 @@ if os.path.exists(FILE_AUTO):
             st.markdown(f"""
             <div class="metric-container">
                 <div class="metric-card"><div class="metric-label">⏱️ Volume Totale Seduta</div><div class="metric-value">{v_vol} min</div></div>
-                <div class="metric-card"><div class="metric-left"></div><div class="metric-label">🏃 Distanza Complessiva</div><div class="metric-value">{v_dist} m</div></div>
+                <div class="metric-card"><div class="metric-label">🏃 Distanza Complessiva</div><div class="metric-value">{v_dist} m</div></div>
                 <div class="metric-card"><div class="metric-label">⚡ Sprint Complessivi</div><div class="metric-value">{v_spr:.1f}</div></div>
                 <div class="metric-card"><div class="metric-label">🏃‍♂️ Corsa in Zona 2</div><div class="metric-value">{v_z2} m</div></div>
                 <div class="metric-card"><div class="metric-label">🔥 Corsa in Zona 3</div><div class="metric-value">{v_z3} m</div></div>
@@ -195,3 +190,4 @@ if os.path.exists(FILE_AUTO):
     except Exception as e:
         st.error(f"Errore nell'elaborazione del file automatico: {e}")
 else:
+    st.info("ℹ️ In attesa dell'inserimento dei dati.")
