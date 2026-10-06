@@ -75,7 +75,7 @@ if os.path.exists(FILE_AUTO):
             for col in report_finale.columns:
                 if col not in ['Nome_Esercitazione', 'Categoria']: report_finale[col] = pd.to_numeric(report_finale[col], errors='coerce').fillna(0).round(0).astype(int)
             st.write("### 📊 Riepilogo Carico Stimato Allenamento")
-             st.write("### 📐 Dimensioni Spazio di Gioco Odierno")
+            st.write("### 📐 Dimensioni Spazio di Gioco Odierno")
             col_lung, col_larg = st.columns(2)
             with col_lung:
                 lunghezza = st.slider("Lunghezza Campo (metri):", min_value=10, max_value=120, value=30, step=1)
