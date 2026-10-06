@@ -61,14 +61,16 @@ if os.path.exists(FILE_AUTO):
                 with cols_m[i]:
                     minuti = st.number_input(f"🏃 {es} (min)", min_value=1, max_value=120, value=15, key=f"m_{es}")
                     id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values
-                    if len(id_es) > 0: programma.append({'Esercitazione_ID': str(id_es), 'Nuovi_Minuti': minuti})
+                    if len(id_es) > 0: 
+                        # 🛠️ CORREZIONE DEFINITIVA DI CALCOLO: inserito 'minuti'
+                        programma.append({'Esercitazione_ID': str(id_es[0]), 'Nuovi_Minuti': minuti})
             df_prog = pd.DataFrame(programma)
             rep = pd.merge(df_prog, db_completo, on='Esercitazione_ID')
             for col in colonne_gps:
                 if col in df_gps.columns:
-                    n_col = col.replace('(m)', 'Stimati (m)').replace('n°', 'Tot.').replace('total dist.', 'total dist. Stimati').replace('z2', 'z2 Stimati').replace('z3', 'z3 Stimati').strip()
+                    n_col = col.replace('(m)', 'Stimati (m)').replace('n°', 'Tot.').strip()
                     rep[n_col] = rep[col] * rep['Nuovi_Minuti']
-            c_finali = ['Nome_Esercitazione', 'Nuovi_Minuti', 'Categoria'] + [col.replace('(m)', 'Stimati (m)').replace('n°', 'Tot.').replace('total dist.', 'total dist. Stimati').replace('z2', 'z2 Stimati').replace('z3', 'z3 Stimati').strip() for col in colonne_gps if col in df_gps.columns]
+            c_finali = ['Nome_Esercitazione', 'Nuovi_Minuti', 'Categoria'] + [col.replace('(m)', 'Stimati (m)').replace('n°', 'Tot.').strip() for col in colonne_gps if col in df_gps.columns]
             report_finale = rep[c_finali].copy()
             for col in report_finale.columns:
                 if col not in ['Nome_Esercitazione', 'Categoria']: report_finale[col] = pd.to_numeric(report_finale[col], errors='coerce').fillna(0).round(0).astype(int)
@@ -109,11 +111,8 @@ if os.path.exists(FILE_AUTO):
                     if col != 'Nuovi_Minuti':
                         val = row[col]
                         max_v, min_v = report_finale[col].max(), report_finale[col].min()
-                        if max_v == min_v: bg, fw, tc = "rgba(255,255,255,1)", "normal", "#111111"
-                        elif val == max_v: bg, fw, tc = "rgba(0,82,165,0.85)", "800", "#ffffff"
-                        elif val == min_v: bg, fw, tc = "rgba(255,255,255,1)", "normal", "#111111"
-                        else: bg, fw, tc = "rgba(173,216,230,0.6)", "600", "#002855"
-                        row_html += f"<td style='background-color: {bg}; font-weight: {fw}; color: {tc} !important;'>{val:.0f}</td>"
+                        alpha = 0.1 + 0.5 * ((val - min_v) / (max_v - min_v)) if max_v != min_v else 0.2
+                        row_html += f"<td style='background-color: rgba(0, 82, 165, {alpha:.2f}); font-weight: 500;'>{val:.0f}</td>"
                 row_html += "</tr>"
                 html_rows += row_html
             headers_html = "<tr><th style='width: 15%;'>Nome Esercitazione</th><th style='width: 7%;'>Minuti</th><th style='width: 12%;'>Categoria</th>"
