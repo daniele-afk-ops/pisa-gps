@@ -127,21 +127,21 @@ if os.path.exists(FILE_AUTO):
                 
             st.markdown("<br>", unsafe_allow_html=True)
             
-            # Seconda riga (Le metriche fisiche dettagliate)
+            # 🛠️ CORREZIONE RIGHE: Riquadri fisici mappati correttamente uno per uno
             sub_cols = st.columns(6)
             
             if 'z2 Stimati (m)' in report_finale.columns:
-                sub_cols.metric("🏃‍♂️ TOT. ZONA 2", f"{int(report_finale['z2 Stimati (m)'].sum())} m")
+                sub_cols[0].metric("🏃‍♂️ TOT. ZONA 2", f"{int(report_finale['z2 Stimati (m)'].sum())} m")
             if 'z3 Stimati (m)' in report_finale.columns:
-                sub_cols.metric("🔥 TOT. ZONA 3", f"{int(report_finale['z3 Stimati (m)'].sum())} m")
+                sub_cols[1].metric("🔥 TOT. ZONA 3", f"{int(report_finale['z3 Stimati (m)'].sum())} m")
             if 'Tot. accel.' in report_finale.columns:
-                sub_cols.metric("📈 ACCELERAZIONI", f"{int(report_finale['Tot. accel.'].sum())}")
+                sub_cols[2].metric("📈 ACCELERAZIONI", f"{int(report_finale['Tot. accel.'].sum())}")
             if 'Tot. decel.' in report_finale.columns:
-                sub_cols.metric("📉 DECELERAZIONI", f"{int(report_finale['Tot. decel.'].sum())}")
+                sub_cols[3].metric("📉 DECELERAZIONI", f"{int(report_finale['Tot. decel.'].sum())}")
             if 'Tot. burst' in report_finale.columns:
-                sub_cols.metric("💥 BURST TOTALI", f"{report_finale['Tot. burst'].sum():.1f}")
+                sub_cols[4].metric("💥 BURST TOTALI", f"{report_finale['Tot. burst'].sum():.1f}")
             if 'Tot. breaks' in report_finale.columns:
-                sub_cols.metric("🛑 BREAKS TOTALI", f"{report_finale['Tot. breaks'].sum():.1f}")
+                sub_cols[5].metric("🛑 BREAKS TOTALI", f"{report_finale['Tot. breaks'].sum():.1f}")
             
             # TABELLA DETTAGLIATA CON FORMATTAZIONE
             st.write("### 📋 TABELLA COMPLESSIVA SUL CARICO DELLE FASI")
