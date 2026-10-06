@@ -3,19 +3,19 @@ import pandas as pd
 import os
 st.set_page_config(page_title="Pisa SC - GPS Load Planner", layout="wide")
 st.markdown("""
-    <style>
-    .main { background-color: #f8fafc; padding: 5px 20px !important; }
-    h1 { color: #002855; font-weight: 800; font-size: 1.5rem; margin: 0 !important; }
-    h3 { color: #0052a5; font-weight: 700; font-size: 1rem; margin-top: 5px !important; margin-bottom: 2px !important; }
+     <style>
+    .main { background-color: #0f172a; padding: 5px 20px !important; }
+    h1 { color: #ffffff; font-weight: 800; font-size: 1.5rem; margin: 0 !important; }
+    h3 { color: #38bdf8; font-weight: 700; font-size: 1rem; margin-top: 15px !important; margin-bottom: 5px !important; }
     .metric-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 5px 0 8px 0; }
-    .metric-card { background-color: #ffffff; padding: 6px 12px; border-radius: 6px; border-left: 4px solid #0052a5; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
-    .metric-label { font-size: 0.65rem !important; font-weight: 700 !important; color: #475569 !important; text-transform: uppercase; }
-    .metric-value { font-size: 1.05rem !important; font-weight: 800 !important; color: #0f172a !important; }
-    .sidebar .sidebar-content { background-color: #002855; color: white; }
-    .t-container { width: 100% !important; overflow-x: hidden !important; margin-top: 10px; }
-    .pisa-table { width: 100% !important; border-collapse: collapse !important; table-layout: fixed !important; }
-    .pisa-table th, .pisa-table td { font-size: 0.72rem !important; padding: 4px 3px !important; text-align: center !important; white-space: normal !important; word-break: break-word !important; border: 1px solid #e2e8f0 !important; }
-    .pisa-table th { background-color: #0052a5 !important; color: white !important; font-weight: bold !important; }
+    .metric-card { background-color: #1e293b; padding: 6px 12px; border-radius: 6px; border-left: 4px solid #38bdf8; box-shadow: 0 1px 2px rgba(0,0,0,0.2); border-top: 1px solid #334155; border-right: 1px solid #334155; border-bottom: 1px solid #334155; }
+    .metric-label { font-size: 0.65rem !important; font-weight: 700 !important; color: #94a3b8 !important; text-transform: uppercase; }
+    .metric-value { font-size: 1.15rem !important; font-weight: 800 !important; color: #ffffff !important; }
+    .t-container { width: 100% !important; overflow-x: hidden !important; margin-top: 15px; background-color: #ffffff !important; padding: 5px; border-radius: 6px; }
+    .pisa-table { width: 100% !important; border-collapse: collapse !important; table-layout: fixed !important; background-color: #ffffff !important; }
+    .pisa-table th, .pisa-table td { font-size: 0.78rem !important; padding: 6px 4px !important; text-align: center !important; white-space: normal !important; word-break: break-word !important; border: 1px solid #cbd5e1 !important; }
+    .pisa-table td { color: #0f172a !important; font-weight: 600 !important; }
+    .pisa-table th { background-color: #0052a5 !important; color: #ffffff !important; font-weight: 800 !important; text-transform: uppercase; }
     </style>
 """, unsafe_allow_html=True)
 col_l, col_t = st.columns(2)
