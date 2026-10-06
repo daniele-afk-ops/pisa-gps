@@ -68,7 +68,7 @@ if os.path.exists(FILE_AUTO):
                 with cols_m[i]:
                     minuti = st.number_input(f"🏃 {es} (min)", min_value=1, max_value=120, value=15, key=f"m_{es}")
                     id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values
-                    if len(id_es) > 0: programma.append({'Esercitazione_ID': str(id_es[0]), 'Nuovi_Minuti': minuti})
+                    if len(id_es) > 0: programma.append({'Esercitazione_ID': str(id_es), 'Nuovi_Minuti': minuti})
                     
             df_prog = pd.DataFrame(programma)
             rep = pd.merge(df_prog, db_completo, on='Esercitazione_ID')
@@ -82,36 +82,47 @@ if os.path.exists(FILE_AUTO):
             
             for col in report_finale.columns:
                 if col not in ['Nome_Esercitazione', 'Categoria']:
-                    report_finale[col] = pd.to_numeric(report_finale[col], errors='coerce').fillna(0)
+                    report_finale[col] = pd.to_numeric(report_finale[col], errors='coerce').fillna(0).round(0).astype(int)
                     
             st.write("### 📊 Riepilogo Carico Stimato Allenamento")
             v_vol = int(report_finale['Nuovi_Minuti'].sum())
             v_dist = int(report_finale['total dist. Stimati (m)'].sum())
-            v_spr = report_finale['Tot. sprint'].sum() if 'Tot. sprint' in report_finale.columns else 0.0
+            
+            col_sprint = [c for c in report_finale.columns if 'sprint' in c.lower()]
+            v_spr = int(report_finale[col_sprint].sum().values[0]) if col_sprint else 0
+            
             v_z2 = int(report_finale['z2 Stimati (m)'].sum()) if 'z2 Stimati (m)' in report_finale.columns else 0
             v_z3 = int(report_finale['z3 Stimati (m)'].sum()) if 'z3 Stimati (m)' in report_finale.columns else 0
-            v_acc = int(report_finale['Tot. accel.'].sum()) if 'Tot. accel.' in report_finale.columns else 0
-            v_dec = int(report_finale['Tot. decel.'].sum()) if 'Tot. decel.' in report_finale.columns else 0
-            v_bur = report_finale['Tot. burst'].sum() if 'Tot. burst' in report_finale.columns else 0.0
-            v_brk = report_finale['Tot. breaks'].sum() if 'Tot. breaks' in report_finale.columns else 0.0
+            
+            col_acc = [c for c in report_finale.columns if 'accel' in c.lower()]
+            v_acc = int(report_finale[col_acc].sum().values[0]) if col_acc else 0
+            
+            col_dec = [c for c in report_finale.columns if 'decel' in c.lower()]
+            v_dec = int(report_finale[col_dec].sum().values[0]) if col_dec else 0
+            
+            col_bur = [c for c in report_finale.columns if 'burst' in c.lower()]
+            v_bur = int(report_finale[col_bur].sum().values[0]) if col_bur else 0
+            
+            col_brk = [c for c in report_finale.columns if 'breaks' in c.lower()]
+            v_brk = int(report_finale[col_brk].sum().values[0]) if col_brk else 0
 
             st.markdown(f"""
             <div class="metric-container">
                 <div class="metric-card"><div class="metric-label">⏱️ Volume Totale</div><div class="metric-value">{v_vol} min</div></div>
                 <div class="metric-card"><div class="metric-label">🏃 Distanza Totale</div><div class="metric-value">{v_dist} m</div></div>
-                <div class="metric-card"><div class="metric-label">⚡ Sprint Totali</div><div class="metric-value">{v_spr:.1f}</div></div>
+                <div class="metric-card"><div class="metric-label">⚡ Sprint Totali</div><div class="metric-value">{v_spr}</div></div>
                 <div class="metric-card"><div class="metric-label">🏃‍♂️ Zona 2 Totale</div><div class="metric-value">{v_z2} m</div></div>
                 <div class="metric-card"><div class="metric-label">🔥 Zona 3 Totale</div><div class="metric-value">{v_z3} m</div></div>
                 <div class="metric-card"><div class="metric-label">📈 Accelerazioni</div><div class="metric-value">{v_acc}</div></div>
                 <div class="metric-card"><div class="metric-label">📉 Decelerazioni</div><div class="metric-value">{v_dec}</div></div>
-                <div class="metric-card"><div class="metric-label">💥 Burst Totali</div><div class="metric-value">{v_bur:.1f}</div></div>
-                <div class="metric-card"><div class="metric-label">🛑 Breaks Totali</div><div class="metric-value">{v_brk:.1f}</div></div>
+                <div class="metric-card"><div class="metric-label">💥 Burst Totali</div><div class="metric-value">{v_bur}</div></div>
+                <div class="metric-card"><div class="metric-label">🛑 Breaks Totali</div><div class="metric-value">{v_brk}</div></div>
             </div>
             """, unsafe_allow_html=True)
             
             st.write("### 📋 Tabella Complessiva Carico Fasi")
             col_num = report_finale.select_dtypes(include=['number']).columns.tolist()
-            formato_v = {c: "{:.1f}" if any(x in c.lower() for x in ['sprint', 'breaks', 'burst']) else "{:.0f}" for c in col_num}
+            formato_v = {c: "{:.0f}" for c in col_num}
             
             st.dataframe(report_finale.style.background_gradient(cmap="Blues", subset=col_num, axis=0).format(formato_v), use_container_width=True)
             st.markdown("<div style='margin-top: 5px;'></div>", unsafe_allow_html=True)
