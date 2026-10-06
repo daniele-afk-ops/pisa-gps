@@ -9,7 +9,9 @@ st.set_page_config(page_title="Pisa SC - GPS Load Planner", layout="wide")
 st.markdown("""
     <style>
     .main { background-color: #f5f7fa; }
-    .stMetric { background-color: #ffffff; padding: 15px; border-radius: 10px; border-left: 5px solid #0052a5; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .stMetric { background-color: #ffffff; padding: 10px 5px; border-radius: 8px; border-left: 4px solid #0052a5; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .stMetric label { font-size: 0.8rem !important; font-weight: 700; color: #002855; }
+    .stMetric .st-c2 { font-size: 1.1rem !important; font-weight: 800; }
     h1 { color: #002855; font-weight: 800; }
     h3 { color: #0052a5; }
     .sidebar .sidebar-content { background-color: #002855; color: white; }
@@ -50,13 +52,11 @@ if os.path.exists(FILE_AUTO):
         
         db_completo = pd.merge(df_esercizi, df_gps_min, on='Esercitazione_ID')
         
-        # Pulizia dei nomi delle categorie per evitare problemi con spazi o asterischi
         db_completo['Categoria_Pulita'] = db_completo['Categoria'].astype(str).str.replace('*', '', regex=False).str.strip()
         
-        # 📋 INTERFACCIA BARRA LATERALE ORDINATA SECONDO LE TUE DIRETTIVE
+        # 📋 INTERFACCIA BARRA LATERALE
         st.sidebar.markdown("## 📋 CATEGORIE ALLENAMENTO")
         
-        # ORDINE CRONOLOGICO AGGIORNATO CON LA VOCE PARTITA
         ordine_cronologico = [
             "Attivazione",
             "tecnico-tattica", 
@@ -69,10 +69,8 @@ if os.path.exists(FILE_AUTO):
         
         scelte_totali = []
         
-        # Genera i menu seguendo l'elenco ordinato
         for cat_ordine in ordine_cronologico:
             match_df = db_completo[db_completo['Categoria_Pulita'].str.lower() == cat_ordine.lower()]
-            
             if not match_df.empty:
                 nome_categoria_visibile = cat_ordine.upper()
                 st.sidebar.markdown(f"**📂 {nome_categoria_visibile}**")
@@ -97,7 +95,7 @@ if os.path.exists(FILE_AUTO):
                     minuti = st.number_input(f"🏃 {es} (min)", min_value=1, max_value=120, value=15, key=f"min_{es}")
                     id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values
                     if len(id_es) > 0:
-                        programma.append({'Esercitazione_ID': str(id_es[0]), 'Nuovi_Minuti': minuti})
+                        programma.append({'Esercitazione_ID': str(id_es), 'Nuovi_Minuti': minuti})
             
             df_programma = pd.DataFrame(programma)
             report_stimato = pd.merge(df_programma, db_completo, on='Esercitazione_ID')
@@ -115,37 +113,40 @@ if os.path.exists(FILE_AUTO):
             colonne_finali = ['Nome_Esercitazione', 'Nuovi_Minuti', 'Categoria'] + [col.replace('(m)', 'Stimati (m)').replace('n°', 'Tot.').strip() for col in colonne_gps if col in df_gps_totali.columns]
             report_finale = report_stimato[colonne_finali]
             
-            # 📊 RIEPILOGO CARICO STIMATO COMPLETO
+            # 📊 RIEPILOGO CARICO STIMATO COMPLETO - 9 COLONNE ALLINEATE IN UN'UNICA RIGA
             st.write("### 📊 RIEPILOGO CARICO STIMATO ALLENAMENTO")
             
-            # Prima riga (I 3 Principali)
-            m1, m2, m3 = st.columns(3)
-            m1.metric("⏱️ VOLUME TOTALE SEDUTA", f"{int(report_finale['Nuovi_Minuti'].sum())} min")
-            m2.metric("🏃 DISTANZA COMPLESSIVA", f"{int(report_finale['total dist. Stimati (m)'].sum())} m")
+            tot_cols = st.columns(9)
+            
+            # Riquadri principali
+            tot_cols[0].metric("⏱️ VOL. TOTALE", f"{int(report_finale['Nuovi_Minuti'].sum())} m'")
+            tot_cols[1].metric("🏃 DIST. TOTALE", f"{int(report_finale['total dist. Stimati (m)'].sum())} m")
             if 'Tot. sprint' in report_finale.columns:
-                m3.metric("⚡ SPRINT COMPLESSIVI", f"{report_finale['Tot. sprint'].sum():.1f}")
+                tot_cols[2].metric("⚡ TOT. SPRINT", f"{report_finale['Tot. sprint'].sum():.1f}")
                 
+            # Riquadri fisici progressivi
+            if 'z2 Stimati (m)' in report_finale.columns:
+                tot_cols[3].metric("🏃‍♂️ TOT. ZONA 2", f"{int(report_finale['z2 Stimati (m)'].sum())} m")
+            if 'z3 Stimati (m)' in report_finale.columns:
+                tot_cols[4].metric("🔥 TOT. ZONA 3", f"{int(report_finale['z3 Stimati (m)'].sum())} m")
+            if 'Tot. accel.' in report_finale.columns:
+                tot_cols[5].metric("📈 TOT. ACCEL.", f"{int(report_finale['Tot. accel.'].sum())}")
+            if 'Tot. decel.' in report_finale.columns:
+                tot_cols[6].metric("📉 TOT. DECEL.", f"{int(report_finale['Tot. decel.'].sum())}")
+            if 'Tot. burst' in report_finale.columns:
+                tot_cols[7].metric("💥 TOT. BURST", f"{report_finale['Tot. burst'].sum():.1f}")
+            if 'Tot. breaks' in report_finale.columns:
+                tot_cols[8].metric("🛑 TOT. BREAKS", f"{report_finale['Tot. breaks'].sum():.1f}")
+            
             st.markdown("<br>", unsafe_allow_html=True)
             
-            # 🛠️ CORREZIONE RIGHE: Riquadri fisici mappati correttamente uno per uno
-            sub_cols = st.columns(6)
-            
-            if 'z2 Stimati (m)' in report_finale.columns:
-                sub_cols[0].metric("🏃‍♂️ TOT. ZONA 2", f"{int(report_finale['z2 Stimati (m)'].sum())} m")
-            if 'z3 Stimati (m)' in report_finale.columns:
-                sub_cols[1].metric("🔥 TOT. ZONA 3", f"{int(report_finale['z3 Stimati (m)'].sum())} m")
-            if 'Tot. accel.' in report_finale.columns:
-                sub_cols[2].metric("📈 ACCELERAZIONI", f"{int(report_finale['Tot. accel.'].sum())}")
-            if 'Tot. decel.' in report_finale.columns:
-                sub_cols[3].metric("📉 DECELERAZIONI", f"{int(report_finale['Tot. decel.'].sum())}")
-            if 'Tot. burst' in report_finale.columns:
-                sub_cols[4].metric("💥 BURST TOTALI", f"{report_finale['Tot. burst'].sum():.1f}")
-            if 'Tot. breaks' in report_finale.columns:
-                sub_cols[5].metric("🛑 BREAKS TOTALI", f"{report_finale['Tot. breaks'].sum():.1f}")
-            
-            # TABELLA DETTAGLIATA CON FORMATTAZIONE
+            # 📋 TABELLA COMPLESSIVA CON BLU ESTESO A TUTTE LE COLONNE NUMERICHE
             st.write("### 📋 TABELLA COMPLESSIVA SUL CARICO DELLE FASI")
-            st.dataframe(report_finale.style.background_gradient(cmap="Blues", subset=['total dist. Stimati (m)']))
+            
+            # Trova in automatico tutte le colonne numeriche generate per applicare il colore blu
+            colonne_numeriche = report_finale.select_dtypes(include=['number']).columns.tolist()
+            
+            st.dataframe(report_finale.style.background_gradient(cmap="Blues", subset=colonne_numeriche))
             
             st.markdown("<br>", unsafe_allow_html=True)
             st.download_button(
