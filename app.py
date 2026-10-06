@@ -17,9 +17,9 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-col_logo, col_titolo = st.columns(2)
+col_logo, col_titolo = st.columns([1, 4])
 with col_logo:
-    if os.path.exists("stemma_pisa.png"): st.image("stemma_pisa.png", width=60)
+    if os.path.exists("stemma_pisa.png"): st.image("stemma_pisa.png", width=130)
 with col_titolo:
     st.title("🔵⚫ PISA SPORTING CLUB")
     st.subheader("Performance & Analytics")
@@ -91,16 +91,16 @@ if os.path.exists(FILE_AUTO):
             v_dist = report_finale['total dist. Stimati (m)'].sum()
             
             col_sprint = [c for c in report_finale.columns if 'sprint' in c.lower()]
-            v_spr = report_finale[col_sprint].sum() if col_sprint else 0
+            v_spr = report_finale[col_sprint].sum().values if col_sprint and hasattr(report_finale[col_sprint].sum(), 'values') else report_finale[col_sprint].sum()
             
             v_z2 = report_finale['z2 Stimati (m)'].sum() if 'z2 Stimati (m)' in report_finale.columns else 0
             v_z3 = report_finale['z3 Stimati (m)'].sum() if 'z3 Stimati (m)' in report_finale.columns else 0
             
             col_acc = [c for c in report_finale.columns if 'accel' in c.lower()]
-            v_acc = report_finale[col_acc].sum() if col_acc else 0
+            v_acc = report_finale[col_acc].sum().values if col_acc and hasattr(report_finale[col_acc].sum(), 'values') else report_finale[col_acc].sum()
             
             col_dec = [c for c in report_finale.columns if 'decel' in c.lower()]
-            v_dec = report_finale[col_dec].sum() if col_dec else 0
+            v_dec = report_finale[col_dec].sum().values if col_dec and hasattr(report_finale[col_dec].sum(), 'values') else report_finale[col_dec].sum()
             
             col_bur = report_finale['Tot. burst'].sum() if 'Tot. burst' in report_finale.columns else 0
             col_brk = report_finale['Tot. breaks'].sum() if 'Tot. breaks' in report_finale.columns else 0
@@ -109,13 +109,13 @@ if os.path.exists(FILE_AUTO):
             <div class="metric-container">
                 <div class="metric-card"><div class="metric-label">⏱️ Volume Totale</div><div class="metric-value">{v_vol:.0f} min</div></div>
                 <div class="metric-card"><div class="metric-label">🏃 Distanza Totale</div><div class="metric-value">{v_dist:.0f} m</div></div>
-                <div class="metric-card"><div class="metric-label">⚡ Sprint Totali</div><div class="metric-value">{v_spr:.0f}</div></div>
+                <div class="metric-card"><div class="metric-label">⚡ Sprint Totali</div><div class="metric-value">{float(v_spr):.0f}</div></div>
                 <div class="metric-card"><div class="metric-label">🏃‍♂️ Zona 2 Totale</div><div class="metric-value">{v_z2:.0f} m</div></div>
                 <div class="metric-card"><div class="metric-label">🔥 Zona 3 Totale</div><div class="metric-value">{v_z3:.0f} m</div></div>
-                <div class="metric-card"><div class="metric-label">📈 Accelerazioni</div><div class="metric-value">{v_acc:.0f}</div></div>
-                <div class="metric-card"><div class="metric-label">📉 Decelerazioni</div><div class="metric-value">{v_dec:.0f}</div></div>
-                <div class="metric-card"><div class="metric-label">💥 Burst Totali</div><div class="metric-value">{v_bur:.0f}</div></div>
-                <div class="metric-card"><div class="metric-label">🛑 Breaks Totali</div><div class="metric-value">{v_brk:.0f}</div></div>
+                <div class="metric-card"><div class="metric-label">📈 Accelerazioni</div><div class="metric-value">{float(v_acc):.0f}</div></div>
+                <div class="metric-card"><div class="metric-label">📉 Decelerazioni</div><div class="metric-value">{float(v_dec):.0f}</div></div>
+                <div class="metric-card"><div class="metric-label">💥 Burst Totali</div><div class="metric-value">{float(v_bur):.0f}</div></div>
+                <div class="metric-card"><div class="metric-label">🛑 Breaks Totali</div><div class="metric-value">{float(v_brk):.0f}</div></div>
             </div>
             """, unsafe_allow_html=True)
             
@@ -123,7 +123,6 @@ if os.path.exists(FILE_AUTO):
             col_num = report_finale.select_dtypes(include=['number']).columns.tolist()
             formato_v = {c: "{:.0f}" for c in col_num}
             
-            # 🛠️ CORREZIONE GRAFICA: Assegnata larghezza medium sia al nome sia alla categoria per evitare troncamenti
             config_colonne = {
                 'Nome_Esercitazione': st.column_config.Column(pinned=True, width="medium"),
                 'Categoria': st.column_config.Column(width="medium")
