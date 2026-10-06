@@ -130,6 +130,7 @@ if os.path.exists(FILE_AUTO):
                         row_html += f"<td style='background-color: rgba(0, 82, 165, {alpha:.2f}) !important;'>{val:.0f}</td>"
                 row_html += "</tr>"
                 html_rows += row_html
+                   
             headers_html = "<tr><th style='width: 15%;'>Nome Esercitazione</th><th style='width: 7%;'>Minuti</th><th style='width: 12%;'>Categoria</th>"
             for col in col_num:
                 if col != 'Nuovi_Minuti':
