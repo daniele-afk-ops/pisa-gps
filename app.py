@@ -69,7 +69,8 @@ if os.path.exists(FILE_AUTO):
                     minuti = st.number_input(f"🏃 {es} (min)", min_value=1, max_value=120, value=15, key=f"m_{es}")
                     id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values
                     if len(id_es) > 0:
-                        programma.append({'Esercitazione_ID': str(id_es), 'Nuovi_Minuti': minuti})
+                        # 🛠️ CORREZIONE DEFINITIVA: Sostituito 'minutes' con 'minuti'
+                        programma.append({'Esercitazione_ID': str(id_es[0]), 'Nuovi_Minuti': minuti})
                     
             df_prog = pd.DataFrame(programma)
             rep = pd.merge(df_prog, db_completo, on='Esercitazione_ID')
@@ -126,9 +127,9 @@ if os.path.exists(FILE_AUTO):
             col_num = report_finale.select_dtypes(include=['number']).columns.tolist()
             formato_v = {c: "{:.0f}" for c in col_num}
             
-            # 🛠️ AGGIORNAMENTO DEFINITIVO: Imposta le colonne di testo larghe (automatiche) e comprime solo quelle dei numeri
+            # 🛠️ SISTEMAZIONE VISIVA DELLE COLONNE: Nome fisso e largo, i numeri si stringono proporzionati
             config_colonne = {
-                'Nome_Esercitazione': st.column_config.Column(pinned=True),
+                'Nome_Esercitazione': st.column_config.Column(pinned=True, width="medium"),
                 'Categoria': st.column_config.Column()
             }
             for col in col_num:
