@@ -4,6 +4,7 @@ import os
 
 st.set_page_config(page_title="Pisa SC - GPS Load Planner", layout="wide")
 
+# 🔵⚫ STILE GRAFICO COMPLETO (Forza le righe orizzontali senza scritte verticali)
 st.markdown("""
     <style>
     .main { background-color: #f8fafc; padding: 5px 20px !important; }
@@ -14,6 +15,12 @@ st.markdown("""
     .metric-label { font-size: 0.65rem !important; font-weight: 700 !important; color: #475569 !important; text-transform: uppercase; }
     .metric-value { font-size: 1.05rem !important; font-weight: 800 !important; color: #0f172a !important; }
     .sidebar .sidebar-content { background-color: #002855; color: white; }
+    
+    /* Impedisce alle parole e ai nomi di andare a capo a singola lettera */
+    div[data-testid="stDataFrame"] td, div[data-testid="stDataFrame"] th {
+        white-space: nowrap !important;
+        padding: 6px 12px !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -126,18 +133,11 @@ if os.path.exists(FILE_AUTO):
             col_num = report_finale.select_dtypes(include=['number']).columns.tolist()
             formato_v = {c: "{:.0f}" for c in col_num}
             
-            # Tabella pulita con larghezza colonne automatica e testo orizzontale fisso
-            html_table = report_finale.style.background_gradient(cmap="Blues", subset=col_num, axis=0).format(formato_v).to_html()
-            st.markdown(f"""
-                <style>
-                    .custom-table-container {{ width: 100% !important; overflow-x: auto !important; }}
-                    table {{ width: 100% !important; border-collapse: collapse; margin-top: 10px; table-layout: auto !important; }}
-                    th, td {{ font-size: 0.85rem !important; padding: 6px 12px !important; text-align: center !important; white-space: nowrap !important; color: #111111 !important; }}
-                    th {{ background-color: #0052a5 !important; color: white !important; font-weight: bold; }}
-                    tr:nth-child(even) {{ background-color: #f1f5f9; }}
-                </style>
-                <div class="custom-table-container">{html_table}</div>
-            """, unsafe_allow_html=True)
+            # 📋 RITORNO AL FORMATO NATIVO STREAMLIT CON SFUMATURE BLU VERTICALI (axis=0)
+            st.dataframe(
+                report_finale.style.background_gradient(cmap="Blues", subset=col_num, axis=0).format(formato_v), 
+                use_container_width=True
+            )
             
             st.markdown("<div style='margin-top: 5px;'></div>", unsafe_allow_html=True)
             st.download_button(label="📥 SCARICA REPORT EXCEL UFFICIALE", data=report_finale.to_csv(index=False).encode('utf-8'), file_name='Report_Pisa_Oggi.csv', mime='text/csv')
