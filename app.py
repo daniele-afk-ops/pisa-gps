@@ -111,8 +111,8 @@ if os.path.exists(FILE_AUTO):
                 <div class="metric-card"><div class="metric-label">⏱️ Volume Totale</div><div class="metric-value">{v_vol} min</div></div>
                 <div class="metric-card"><div class="metric-label">🏃 Distanza Totale</div><div class="metric-value">{v_dist} m</div></div>
                 <div class="metric-card"><div class="metric-label">⚡ Sprint Totali</div><div class="metric-value">{v_spr}</div></div>
-                <div class="metric-card"><div class="metric-label">🏃‍♂️ Zona 2 Totale</div><div class="metric-value">{col_z2} m</div></div>
-                <div class="metric-card"><div class="metric-label">🔥 Zona 3 Totale</div><div class="metric-value">{col_z3} m</div></div>
+                <div class="metric-card"><div class="metric-label">🏃‍♂️ Zona 2 Totale</div><div class="metric-value">{v_z2} m</div></div>
+                <div class="metric-card"><div class="metric-label">🔥 Zona 3 Totale</div><div class="metric-value">{v_z3} m</div></div>
                 <div class="metric-card"><div class="metric-label">📈 Accelerazioni</div><div class="metric-value">{col_acc}</div></div>
                 <div class="metric-card"><div class="metric-label">📉 Decelerazioni</div><div class="metric-value">{col_dec}</div></div>
                 <div class="metric-card"><div class="metric-label">💥 Burst Totali</div><div class="metric-value">{col_bur}</div></div>
