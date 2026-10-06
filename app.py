@@ -4,6 +4,7 @@ import os
 
 st.set_page_config(page_title="Pisa SC - GPS Load Planner", layout="wide")
 
+# Grafica personalizzata e riduzione dello spazio vuoto delle tabelle
 st.markdown("""
     <style>
     .main { background-color: #f8fafc; padding: 5px 20px !important; }
@@ -19,7 +20,7 @@ st.markdown("""
 
 col_logo, col_titolo = st.columns(2)
 with col_logo:
-    if os.path.exists("stemma_pisa.png"): st.image("stemma_pisa.png", width=130)
+    if os.path.exists("stemma_pisa.png"): st.image("stemma_pisa.png", width=120)
 with col_titolo:
     st.title("🔵⚫ PISA SPORTING CLUB")
     st.subheader("Performance & Analytics")
@@ -87,35 +88,35 @@ if os.path.exists(FILE_AUTO):
                     report_finale[col] = pd.to_numeric(report_finale[col], errors='coerce').fillna(0).round(0).astype(int)
                     
             st.write("### 📊 Riepilogo Carico Stimato Allenamento")
-            v_vol = float(report_finale['Nuovi_Minuti'].sum())
-            v_dist = float(report_finale['total dist. Stimati (m)'].sum())
+            v_vol = int(report_finale['Nuovi_Minuti'].sum())
+            v_dist = int(report_finale['total dist. Stimati (m)'].sum())
             
             col_sprint = [c for c in report_finale.columns if 'sprint' in c.lower()]
-            v_spr = float(report_finale[col_sprint].sum().sum()) if col_sprint else 0.0
+            v_spr = int(report_finale[col_sprint].sum().sum()) if col_sprint else 0
             
-            v_z2 = float(report_finale['z2 Stimati (m)'].sum()) if 'z2 Stimati (m)' in report_finale.columns else 0.0
-            v_z3 = float(report_finale['z3 Stimati (m)'].sum()) if 'z3 Stimati (m)' in report_finale.columns else 0.0
+            v_z2 = int(report_finale['z2 Stimati (m)'].sum()) if 'z2 Stimati (m)' in report_finale.columns else 0
+            v_z3 = int(report_finale['z3 Stimati (m)'].sum()) if 'z3 Stimati (m)' in report_finale.columns else 0
             
             col_acc = [c for c in report_finale.columns if 'accel' in c.lower()]
-            v_acc = float(report_finale[col_acc].sum().sum()) if col_acc else 0.0
+            v_acc = int(report_finale[col_acc].sum().sum()) if col_acc else 0
             
             col_dec = [c for c in report_finale.columns if 'decel' in c.lower()]
-            v_dec = float(report_finale[col_dec].sum().sum()) if col_dec else 0.0
+            v_dec = int(report_finale[col_dec].sum().sum()) if col_dec else 0
             
-            col_bur = float(report_finale['Tot. burst'].sum()) if 'Tot. burst' in report_finale.columns else 0.0
-            col_brk = float(report_finale['Tot. breaks'].sum()) if 'Tot. breaks' in report_finale.columns else 0.0
+            col_bur = int(report_finale['Tot. burst'].sum()) if 'Tot. burst' in report_finale.columns else 0
+            col_brk = int(report_finale['Tot. breaks'].sum()) if 'Tot. breaks' in report_finale.columns else 0
 
             st.markdown(f"""
             <div class="metric-container">
-                <div class="metric-card"><div class="metric-label">⏱️ Volume Totale</div><div class="metric-value">{v_vol:.0f} min</div></div>
-                <div class="metric-card"><div class="metric-label">🏃 Distanza Totale</div><div class="metric-value">{v_dist:.0f} m</div></div>
-                <div class="metric-card"><div class="metric-label">⚡ Sprint Totali</div><div class="metric-value">{v_spr:.0f}</div></div>
-                <div class="metric-card"><div class="metric-label">🏃‍♂️ Zona 2 Totale</div><div class="metric-value">{v_z2:.0f} m</div></div>
-                <div class="metric-card"><div class="metric-label">🔥 Zona 3 Totale</div><div class="metric-value">{v_z3:.0f} m</div></div>
-                <div class="metric-card"><div class="metric-label">📈 Accelerazioni</div><div class="metric-value">{v_acc:.0f}</div></div>
-                <div class="metric-card"><div class="metric-label">📉 Decelerazioni</div><div class="metric-value">{v_dec:.0f}</div></div>
-                <div class="metric-card"><div class="metric-label">💥 Burst Totali</div><div class="metric-value">{v_bur:.0f}</div></div>
-                <div class="metric-card"><div class="metric-label">🛑 Breaks Totali</div><div class="metric-value">{v_brk:.0f}</div></div>
+                <div class="metric-card"><div class="metric-label">⏱️ Volume Totale</div><div class="metric-value">{v_vol} min</div></div>
+                <div class="metric-card"><div class="metric-label">🏃 Distanza Totale</div><div class="metric-value">{v_dist} m</div></div>
+                <div class="metric-card"><div class="metric-label">⚡ Sprint Totali</div><div class="metric-value">{v_spr}</div></div>
+                <div class="metric-card"><div class="metric-label">🏃‍♂️ Zona 2 Totale</div><div class="metric-value">{v_z2} m</div></div>
+                <div class="metric-card"><div class="metric-label">🔥 Zona 3 Totale</div><div class="metric-value">{v_z3} m</div></div>
+                <div class="metric-card"><div class="metric-label">📈 Accelerazioni</div><div class="metric-value">{v_acc}</div></div>
+                <div class="metric-card"><div class="metric-label">📉 Decelerazioni</div><div class="metric-value">{v_dec}</div></div>
+                <div class="metric-card"><div class="metric-label">💥 Burst Totali</div><div class="metric-value">{v_bur}</div></div>
+                <div class="metric-card"><div class="metric-label">🛑 Breaks Totali</div><div class="metric-value">{v_brk}</div></div>
             </div>
             """, unsafe_allow_html=True)
             
@@ -123,12 +124,9 @@ if os.path.exists(FILE_AUTO):
             col_num = report_finale.select_dtypes(include=['number']).columns.tolist()
             formato_v = {c: "{:.0f}" for c in col_num}
             
-            # Confezioniamo le colonne con dimensioni bloccate per forzare l'allineamento orizzontale
-            config_colonne = {
-                'Nome_Esercitazione': st.column_config.Column(pinned=True, width="medium"),
-                'Categoria': st.column_config.Column(width="medium")
-            }
-            for col in col_num:
+            # Compressione automatica delle colonne per evitare lo scorrimento orizzontale
+            config_colonne = {}
+            for col in report_finale.columns:
                 config_colonne[col] = st.column_config.Column(width="small")
             
             st.dataframe(
