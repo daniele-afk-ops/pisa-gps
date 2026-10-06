@@ -67,7 +67,7 @@ if os.path.exists(FILE_AUTO):
             for i, es in enumerate(scelte_totali):
                 with cols_m[i]:
                     minuti = st.number_input(f"🏃 {es} (min)", min_value=1, max_value=120, value=15, key=f"m_{es}")
-                    id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values[0]
+                    id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values
                     programma.append({'Esercitazione_ID': str(id_es), 'Nuovi_Minuti': minuti})
                     
             df_prog = pd.DataFrame(programma)
@@ -90,22 +90,22 @@ if os.path.exists(FILE_AUTO):
             v_dist = int(report_finale['total dist. Stimati (m)'].sum())
             
             col_sprint = [c for c in report_finale.columns if 'sprint' in c.lower()]
-            v_spr = int(report_finale[col_sprint[0]].sum()) if col_sprint else 0
+            v_spr = int(report_finale[col_sprint].sum()) if col_sprint else 0
             
             v_z2 = int(report_finale['z2 Stimati (m)'].sum()) if 'z2 Stimati (m)' in report_finale.columns else 0
             v_z3 = int(report_finale['z3 Stimati (m)'].sum()) if 'z3 Stimati (m)' in report_finale.columns else 0
             
             col_acc = [c for c in report_finale.columns if 'accel' in c.lower()]
-            v_acc = int(report_finale[col_acc[0]].sum()) if col_acc else 0
+            v_acc = int(report_finale[col_acc].sum()) if col_acc else 0
             
             col_dec = [c for c in report_finale.columns if 'decel' in c.lower()]
-            v_dec = int(report_finale[col_dec[0]].sum()) if col_dec else 0
+            v_dec = int(report_finale[col_dec].sum()) if col_dec else 0
             
             col_bur = [c for c in report_finale.columns if 'burst' in c.lower()]
-            v_bur = int(report_finale[col_bur[0]].sum()) if col_bur else 0
+            v_bur = int(report_finale[col_bur].sum()) if col_bur else 0
             
             col_brk = [c for c in report_finale.columns if 'breaks' in c.lower()]
-            v_brk = int(report_finale[col_brk[0]].sum()) if col_brk else 0
+            v_brk = int(report_finale[col_brk].sum()) if col_brk else 0
 
             st.markdown(f"""
             <div class="metric-container">
@@ -125,7 +125,12 @@ if os.path.exists(FILE_AUTO):
             col_num = report_finale.select_dtypes(include=['number']).columns.tolist()
             formato_v = {c: "{:.0f}" for c in col_num}
             
-            st.dataframe(report_finale.style.background_gradient(cmap="Blues", subset=col_num, axis=0).format(formato_v), use_container_width=True)
+            # 🛠️ AGGIORNAMENTO DI COMPRESSIONE: column_config forza le colonne ad adattarsi alla larghezza dello schermo Honor
+            st.dataframe(
+                report_finale.style.background_gradient(cmap="Blues", subset=col_num, axis=0).format(formato_v), 
+                use_container_width=True,
+                column_config={col: st.column_config.Column(width="small") for col in report_finale.columns}
+            )
             st.markdown("<div style='margin-top: 5px;'></div>", unsafe_allow_html=True)
             st.download_button(label="📥 SCARICA REPORT EXCEL UFFICIALE", data=report_finale.to_csv(index=False).encode('utf-8'), file_name='Report_Pisa_Oggi.csv', mime='text/csv')
         else:
