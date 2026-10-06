@@ -109,14 +109,14 @@ if os.path.exists(FILE_AUTO):
                 row_html = f"<tr><td>{row['Nome_Esercitazione']}</td><td>{row['Nuovi_Minuti']}</td><td>{row['Categoria']}</td>"
                 for col in col_num:
                     if col != 'Nuovi_Minuti':
-                        val = row[col]
-                        max_v, min_v = report_finale[col].max(), report_finale[col].min()
-                        if max_v != min_v:
-                        alpha = 0.1 + 0.5 * ((val - min_v) / (max_v - min_v))
-                        else:
-                        alpha = 0.2
-                        bg_style = f"style='background-color: rgba(0, 82, 165, {alpha:.2f}); font-weight: 500; color: #111111 !important;'"
-                        row_html += f"<td {bg_style}>{val:.0f}</td>"
+                       val = row[col]
+                       max_v, min_v = report_finale[col].max(), report_finale[col].min()
+                       if max_v != min_v:
+                       alpha = 0.1 + 0.5 * ((val - min_v) / (max_v - min_v))
+                       else:
+                       alpha = 0.2
+                       bg_style = f"style='background-color: rgba(0, 82, 165, {alpha:.2f}); font-weight: 500; color: #111111 !important;'"
+                       row_html += f"<td {bg_style}>{val:.0f}</td>"
                 row_html += "</tr>"
                 html_rows += row_html
             headers_html = "<tr><th style='width: 15%;'>Nome Esercitazione</th><th style='width: 7%;'>Minuti</th><th style='width: 12%;'>Categoria</th>"
