@@ -23,7 +23,7 @@ with col_l:
     if os.path.exists("stemma_pisa.png"): st.image("stemma_pisa.png", width=130)
 with col_t:
     st.title("PISA SPORTING CLUB")
-    st.subheader("Performance & Analytics")
+    st.subheader("Performance & Analytics — Pianificazione Seduta")
 st.markdown("<hr style='border-top: 2px solid #002855;'>", unsafe_allow_html=True)
 FILE_AUTO = "database_gps.xlsx"
 if os.path.exists(FILE_AUTO):
