@@ -67,8 +67,9 @@ if os.path.exists(FILE_AUTO):
             for i, es in enumerate(scelte_totali):
                 with cols_m[i]:
                     minuti = st.number_input(f"🏃 {es} (min)", min_value=1, max_value=120, value=15, key=f"m_{es}")
-                    id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values[0]
-                    programma.append({'Esercitazione_ID': str(id_es), 'Nuovi_Minuti': minuti})
+                    id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values
+                    if len(id_es) > 0:
+                        programma.append({'Esercitazione_ID': str(id_es[0]), 'Nuovi_Minuti': minuti})
                     
             df_prog = pd.DataFrame(programma)
             rep = pd.merge(df_prog, db_completo, on='Esercitazione_ID')
@@ -101,11 +102,8 @@ if os.path.exists(FILE_AUTO):
             col_dec = [c for c in report_finale.columns if 'decel' in c.lower()]
             v_dec = int(report_finale[col_dec].sum().sum()) if col_dec else 0
             
-            col_bur = [c for c in report_finale.columns if 'burst' in c.lower()]
-            col_bur_val = int(report_finale[col_bur].sum().sum()) if col_bur else 0
-            
-            col_brk = [c for c in report_finale.columns if 'breaks' in c.lower()]
-            col_brk_val = int(report_finale[col_brk].sum().sum()) if col_brk else 0
+            col_bur = int(report_finale['Tot. burst'].sum()) if 'Tot. burst' in report_finale.columns else 0
+            col_brk = int(report_finale['Tot. breaks'].sum()) if 'Tot. breaks' in report_finale.columns else 0
 
             st.markdown(f"""
             <div class="metric-container">
@@ -116,8 +114,8 @@ if os.path.exists(FILE_AUTO):
                 <div class="metric-card"><div class="metric-label">🔥 Zona 3 Totale</div><div class="metric-value">{v_z3} m</div></div>
                 <div class="metric-card"><div class="metric-label">📈 Accelerazioni</div><div class="metric-value">{v_acc}</div></div>
                 <div class="metric-card"><div class="metric-label">📉 Decelerazioni</div><div class="metric-value">{v_dec}</div></div>
-                <div class="metric-card"><div class="metric-label">💥 Burst Totali</div><div class="metric-value">{col_bur_val}</div></div>
-                <div class="metric-card"><div class="metric-label">🛑 Breaks Totali</div><div class="metric-value">{col_brk_val}</div></div>
+                <div class="metric-card"><div class="metric-label">💥 Burst Totali</div><div class="metric-value">{col_bur_val if 'col_bur_val' in locals() else v_bur}</div></div>
+                <div class="metric-card"><div class="metric-label">🛑 Breaks Totali</div><div class="metric-value">{col_brk_val if 'col_brk_val' in locals() else v_brk}</div></div>
             </div>
             """, unsafe_allow_html=True)
             
@@ -125,14 +123,19 @@ if os.path.exists(FILE_AUTO):
             col_num = report_finale.select_dtypes(include=['number']).columns.tolist()
             formato_v = {c: "{:.0f}" for c in col_num}
             
-            st.dataframe(
-                report_finale.style.background_gradient(cmap="Blues", subset=col_num, axis=0).format(formato_v), 
-                use_container_width=True,
-                column_config={
-                    "Nome_Esercitazione": st.column_config.Column(width="medium", pinned=True),
-                    "Categoria": st.column_config.Column(width="medium")
-                }
-            )
+            # 🛠️ NUOVA TABELLA HTML INTEGRATA E BLOCCATA CONTRO I TRONCAMENTI
+            html_table = report_finale.style.background_gradient(cmap="Blues", subset=col_num, axis=0).format(formato_v).to_html()
+            st.markdown(f"""
+                <style>
+                    .custom-table-container {{ width: 100% !important; overflow-x: auto !important; }}
+                    table {{ width: 100% !important; border-collapse: collapse; margin-top: 10px; table-layout: auto !important; }}
+                    th, td {{ font-size: 0.85rem !important; padding: 6px 12px !important; text-align: center !important; white-space: nowrap !important; color: #111111 !important; }}
+                    th {{ background-color: #0052a5 !important; color: white !important; font-weight: bold; }}
+                    tr:nth-child(even) {{ background-color: #f1f5f9; }}
+                </style>
+                <div class="custom-table-container">{html_table}</div>
+            """, unsafe_allow_html=True)
+            
             st.markdown("<div style='margin-top: 5px;'></div>", unsafe_allow_html=True)
             st.download_button(label="📥 SCARICA REPORT EXCEL UFFICIALE", data=report_finale.to_csv(index=False).encode('utf-8'), file_name='Report_Pisa_Oggi.csv', mime='text/csv')
         else:
