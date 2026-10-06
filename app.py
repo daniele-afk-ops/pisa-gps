@@ -102,8 +102,11 @@ if os.path.exists(FILE_AUTO):
             col_dec = [c for c in report_finale.columns if 'decel' in c.lower()]
             v_dec = int(report_finale[col_dec].sum().sum()) if col_dec else 0
             
-            col_bur = int(report_finale['Tot. burst'].sum()) if 'Tot. burst' in report_finale.columns else 0
-            col_brk = int(report_finale['Tot. breaks'].sum()) if 'Tot. breaks' in report_finale.columns else 0
+            col_bur = [c for c in report_finale.columns if 'burst' in c.lower()]
+            v_bur_val = int(report_finale[col_bur].sum().sum()) if col_bur else 0
+            
+            col_brk = [c for c in report_finale.columns if 'breaks' in c.lower()]
+            v_brk_val = int(report_finale[col_brk].sum().sum()) if col_brk else 0
 
             st.markdown(f"""
             <div class="metric-container">
@@ -114,8 +117,8 @@ if os.path.exists(FILE_AUTO):
                 <div class="metric-card"><div class="metric-label">🔥 Zona 3 Totale</div><div class="metric-value">{v_z3} m</div></div>
                 <div class="metric-card"><div class="metric-label">📈 Accelerazioni</div><div class="metric-value">{v_acc}</div></div>
                 <div class="metric-card"><div class="metric-label">📉 Decelerazioni</div><div class="metric-value">{v_dec}</div></div>
-                <div class="metric-card"><div class="metric-label">💥 Burst Totali</div><div class="metric-value">{col_bur_val if 'col_bur_val' in locals() else v_bur}</div></div>
-                <div class="metric-card"><div class="metric-label">🛑 Breaks Totali</div><div class="metric-value">{col_brk_val if 'col_brk_val' in locals() else v_brk}</div></div>
+                <div class="metric-card"><div class="metric-label">💥 Burst Totali</div><div class="metric-value">{v_bur_val}</div></div>
+                <div class="metric-card"><div class="metric-label">🛑 Breaks Totali</div><div class="metric-value">{v_brk_val}</div></div>
             </div>
             """, unsafe_allow_html=True)
             
@@ -123,7 +126,7 @@ if os.path.exists(FILE_AUTO):
             col_num = report_finale.select_dtypes(include=['number']).columns.tolist()
             formato_v = {c: "{:.0f}" for c in col_num}
             
-            # 🛠️ NUOVA TABELLA HTML INTEGRATA E BLOCCATA CONTRO I TRONCAMENTI
+            # Tabella pulita con larghezza colonne automatica e testo orizzontale fisso
             html_table = report_finale.style.background_gradient(cmap="Blues", subset=col_num, axis=0).format(formato_v).to_html()
             st.markdown(f"""
                 <style>
