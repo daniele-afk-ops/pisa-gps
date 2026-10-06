@@ -4,6 +4,7 @@ import os
 
 st.set_page_config(page_title="Pisa SC - GPS Load Planner", layout="wide")
 
+# 🔵⚫ STILE VISIVO AVANZATO: Forza il testo ad andare a capo nelle celle senza allargare le colonne
 st.markdown("""
     <style>
     .main { background-color: #f8fafc; padding: 5px 20px !important; }
@@ -14,6 +15,13 @@ st.markdown("""
     .metric-label { font-size: 0.65rem !important; font-weight: 700 !important; color: #475569 !important; text-transform: uppercase; }
     .metric-value { font-size: 1.05rem !important; font-weight: 800 !important; color: #0f172a !important; }
     .sidebar .sidebar-content { background-color: #002855; color: white; }
+    
+    /* 🛠️ TRUCCO CSS: Costringe le celle della tabella a mandare le parole a capo se lo spazio si stringe */
+    div[data-testid="stDataFrame"] td, div[data-testid="stDataFrame"] th {
+        white-space: normal !important;
+        word-break: break-word !important;
+        line-height: 1.2 !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -69,7 +77,7 @@ if os.path.exists(FILE_AUTO):
                     minuti = st.number_input(f"🏃 {es} (min)", min_value=1, max_value=120, value=15, key=f"m_{es}")
                     id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values
                     if len(id_es) > 0:
-                        programma.append({'Esercitazione_ID': str(id_es[0]), 'Nuovi_Minuti': minuti})
+                        programma.append({'Esercitazione_ID': str(id_es), 'Nuovi_Minuti': minuti})
                     
             df_prog = pd.DataFrame(programma)
             rep = pd.merge(df_prog, db_completo, on='Esercitazione_ID')
@@ -90,25 +98,21 @@ if os.path.exists(FILE_AUTO):
             v_vol = int(report_finale['Nuovi_Minuti'].sum())
             v_dist = int(report_finale['total dist. Stimati (m)'].sum())
             
-            c_sprint = [c for c in report_finale.columns if 'sprint' in c.lower()]
-            v_spr = int(report_finale[c_sprint].sum().sum()) if c_sprint else 0
+            col_sprint = [c for c in report_finale.columns if 'sprint' in c.lower()]
+            v_spr = int(report_finale[col_sprint].sum().sum()) if col_sprint else 0
             
             v_z2 = int(report_finale['z2 Stimati (m)'].sum()) if 'z2 Stimati (m)' in report_finale.columns else 0
             v_z3 = int(report_finale['z3 Stimati (m)'].sum()) if 'z3 Stimati (m)' in report_finale.columns else 0
             
-            c_acc = [c for c in report_finale.columns if 'accel' in c.lower()]
-            v_acc = int(report_finale[c_acc].sum().sum()) if c_acc else 0
+            col_acc = [c for c in report_finale.columns if 'accel' in c.lower()]
+            v_acc = int(report_finale[col_acc].sum().sum()) if col_acc else 0
             
-            c_dec = [c for c in report_finale.columns if 'decel' in c.lower()]
-            v_dec = int(report_finale[c_dec].sum().sum()) if c_dec else 0
+            col_dec = [c for c in report_finale.columns if 'decel' in c.lower()]
+            v_dec = int(report_finale[col_dec].sum().sum()) if col_dec else 0
             
-            c_bur = [c for c in report_finale.columns if 'burst' in c.lower()]
-            v_bur = int(report_finale[c_bur].sum().sum()) if c_bur else 0
-            
-            c_brk = [c for c in report_finale.columns if 'breaks' in c.lower()]
-            v_brk = int(report_finale[c_brk].sum().sum()) if c_brk else 0
+            col_bur = int(report_finale['Tot. burst'].sum()) if 'Tot. burst' in report_finale.columns else 0
+            col_brk = int(report_finale['Tot. breaks'].sum()) if 'Tot. breaks' in report_finale.columns else 0
 
-            # 🛠️ CORREZIONE RIGIDA BOX: Estratti i valori numerici puliti senza Series o parentesi quadre
             st.markdown(f"""
             <div class="metric-container">
                 <div class="metric-card"><div class="metric-label">⏱️ Volume Totale</div><div class="metric-value">{v_vol} min</div></div>
@@ -127,10 +131,10 @@ if os.path.exists(FILE_AUTO):
             col_num = report_finale.select_dtypes(include=['number']).columns.tolist()
             formato_v = {c: "{:.0f}" for c in col_num}
             
-            # Forziamo una larghezza ultra-compressa per far rientrare la tabella nel monitor Honor
+            # 🛠️ SOLUZIONE PERFETTA: Blocchiamo le colonne numeriche corte, mentre lasciamo spazio flessibile per i testi con testo a capo
             config_colonne = {
-                'Nome_Esercitazione': st.column_config.Column(pinned=True, width="small"),
-                'Categoria': st.column_config.Column(width="small")
+                'Nome_Esercitazione': st.column_config.Column(pinned=True, width="medium"),
+                'Categoria': st.column_config.Column(width="medium")
             }
             for col in col_num:
                 config_colonne[col] = st.column_config.Column(width="small")
