@@ -50,22 +50,41 @@ if os.path.exists(FILE_AUTO):
         
         db_completo = pd.merge(df_esercizi, df_gps_min, on='Esercitazione_ID')
         
-        # 📋 INTERFACCIA BARRA LATERALE FISSA PER CATEGORIE
+        # Pulizia dei nomi delle categorie per evitare problemi con spazi o asterischi sfuggiti su Excel
+        db_completo['Categoria_Pulita'] = db_completo['Categoria'].astype(str).str.replace('*', '', regex=False).str.strip()
+        
+        # 📋 INTERFACCIA BARRA LATERALE ORDINATA SECONDO LE TUE DIRETTIVE
         st.sidebar.markdown("## 📋 CATEGORIE ALLENAMENTO")
         
-        # Prende le categorie uniche presenti nel tuo Excel
-        categorie_disponibili = db_completo['Categoria'].dropna().unique().tolist()
+        # NUOVO ORDINE CRONOLOGICO RICHIESTO
+        ordine_cronologico = [
+            "Attivazione",
+            "tecnico-tattica", 
+            "possesso",
+            "preparazione atletica",
+            "SSG",
+            "partita a tema"
+        ]
         
         scelte_totali = []
         
-        # Crea un menu fisso per ogni categoria una sotto l'altra
-        for cat in categorie_disponibili:
-            st.sidebar.markdown(f"**📂 {cat.upper()}**")
-            # Filtra gli esercizi solo di questa categoria
-            esercizi_cat = db_completo[db_completo['Categoria'] == cat]['Nome_Esercitazione'].tolist()
-            scelte_cat = st.sidebar.multiselect(f"Seleziona attività per {cat}:", esercizi_cat, key=f"sel_{cat}", label_visibility="collapsed")
-            if scelte_cat:
-                scelte_totali.extend(scelte_cat)
+        # Genera i menu seguendo l'elenco ordinato
+        for cat_ordine in ordine_cronologico:
+            match_df = db_completo[db_completo['Categoria_Pulita'].str.lower() == cat_ordine.lower()]
+            
+            if not match_df.empty:
+                nome_categoria_visibile = cat_ordine.upper()
+                st.sidebar.markdown(f"**📂 {nome_categoria_visibile}**")
+                
+                esercizi_cat = match_df['Nome_Esercitazione'].tolist()
+                scelte_cat = st.sidebar.multiselect(
+                    f"Seleziona attività per {cat_ordine}:", 
+                    esercizi_cat, 
+                    key=f"sel_{cat_ordine.lower()}", 
+                    label_visibility="collapsed"
+                )
+                if choices_cat := scelte_cat:
+                    scelte_totali.extend(choices_cat)
         
         if scelte_totali:
             programma = []
@@ -77,7 +96,7 @@ if os.path.exists(FILE_AUTO):
                     minuti = st.number_input(f"🏃 {es} (min)", min_value=1, max_value=120, value=15, key=f"min_{es}")
                     id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values
                     if len(id_es) > 0:
-                        programma.append({'Esercitazione_ID': str(id_es[0]), 'Nuovi_Minuti': minuti})
+                        programma.append({'Esercitazione_ID': str(id_es), 'Nuovi_Minuti': minuti})
             
             df_programma = pd.DataFrame(programma)
             report_stimato = pd.merge(df_programma, db_completo, on='Esercitazione_ID')
@@ -111,23 +130,23 @@ if os.path.exists(FILE_AUTO):
             sub_cols = st.columns(6)
             
             if 'z2 Stimati (m)' in report_finale.columns:
-                sub_cols[0].metric("🏃‍♂️ TOT. ZONA 2", f"{int(report_finale['z2 Stimati (m)'].sum())} m")
+                sub_cols.metric("🏃‍♂️ TOT. ZONA 2", f"{int(report_finale['z2 Stimati (m)'].sum())} m")
             if 'z3 Stimati (m)' in report_finale.columns:
-                sub_cols[1].metric("🔥 TOT. ZONA 3", f"{int(report_finale['z3 Stimati (m)'].sum())} m")
+                sub_cols.metric("🔥 TOT. ZONA 3", f"{int(report_finale['z3 Stimati (m)'].sum())} m")
             if 'Tot. accel.' in report_finale.columns:
-                sub_cols[2].metric("📈 ACCELERAZIONI", f"{int(report_finale['Tot. accel.'].sum())}")
+                sub_cols.metric("📈 ACCELERAZIONI", f"{int(report_finale['Tot. accel.'].sum())}")
             if 'Tot. decel.' in report_finale.columns:
-                sub_cols[3].metric("📉 DECELERAZIONI", f"{int(report_finale['Tot. decel.'].sum())}")
+                sub_cols.metric("📉 DECELERAZIONI", f"{int(report_finale['Tot. decel.'].sum())}")
             if 'Tot. burst' in report_finale.columns:
-                sub_cols[4].metric("💥 BURST TOTALI", f"{report_finale['Tot. burst'].sum():.1f}")
+                sub_cols.metric("💥 BURST TOTALI", f"{report_finale['Tot. burst'].sum():.1f}")
             if 'Tot. breaks' in report_finale.columns:
-                sub_cols[5].metric("🛑 BREAKS TOTALI", f"{report_finale['Tot. breaks'].sum():.1f}")
+                sub_cols.metric("🛑 BREAKS TOTALI", f"{report_finale['Tot. breaks'].sum():.1f}")
             
             # TABELLA DETTAGLIATA CON FORMATTAZIONE
             st.write("### 📋 TABELLA COMPLESSIVA SUL CARICO DELLE FASI")
             st.dataframe(report_finale.style.background_gradient(cmap="Blues", subset=['total dist. Stimati (m)']))
             
-            st.markdown("<br>", unsafe_allow_index=True)
+            st.markdown("<br>", unsafe_allow_html=True)
             st.download_button(
                 label="📥 SCARICA REPORT EXCEL UFFICIALE",
                 data=report_finale.to_csv(index=False).encode('utf-8'),
@@ -139,4 +158,4 @@ if os.path.exists(FILE_AUTO):
     except Exception as e:
         st.error(f"Errore nell'elaborazione del file automatico: {e}")
 else:
-    st.info("ℹ️ Carica il tuo file database_gps.xlsx su GitHub per attivare la lettura automatica.")
+    st.info("ℹ trick Carica il tuo file database_gps.xlsx su GitHub per attivare la lettura automatica.")
