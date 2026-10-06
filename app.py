@@ -95,16 +95,6 @@ if os.path.exists(FILE_AUTO):
                 focus = "SPAZIO MEDIO"
             else:
                 focus = "SPAZIO AMPIO "
-            st.markdown(f"""
-            <div style="background-color: #002855; color: white; padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 6px solid #0052a5;">
-                <b>📊 ANALISI DELLA DENSITÀ DI ALLENAMENTO:</b><br>
-                • Giocatori totali stimati dalle attività: <b>{tot_giocatori_rilevati}</b> calciatori<br>
-                • Area totale calpestabile: <b>{area_totale} m²</b><br>
-                • Spazio utile individuale: <b>{mq_giocatore:.1f} m² per giocatore</b><br><br>
-                🎯 <b>{focus_atletico}</b>
-            </div>
-            """, unsafe_allow_html=True)
-
             v_vol = int(report_finale['Nuovi_Minuti'].sum())
             v_dist = int(report_finale['total dist. Stimati (m)'].sum())
             col_sprint = [c for c in report_finale.columns if 'sprint' in c.lower()]
