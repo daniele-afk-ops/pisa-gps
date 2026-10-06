@@ -3,27 +3,27 @@ import pandas as pd
 import os
 st.set_page_config(page_title="Pisa SC - GPS Load Planner", layout="wide")
 st.markdown("""
-     <style>
-    .main { background-color: #0f172a; padding: 5px 20px !important; }
-    h1 { color: #ffffff; font-weight: 800; font-size: 1.5rem; margin: 0 !important; }
-    h3 { color: #38bdf8; font-weight: 700; font-size: 1rem; margin-top: 15px !important; margin-bottom: 5px !important; }
+    <style>
+    .main { background-color: #f8fafc; padding: 5px 20px !important; }
+    h1 { color: #002855; font-weight: 800; font-size: 1.5rem; margin: 0 !important; }
+    h3 { color: #0052a5; font-weight: 700; font-size: 1rem; margin-top: 5px !important; margin-bottom: 2px !important; }
     .metric-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 5px 0 8px 0; }
-    .metric-card { background-color: #1e293b; padding: 6px 12px; border-radius: 6px; border-left: 4px solid #38bdf8; box-shadow: 0 1px 2px rgba(0,0,0,0.2); border-top: 1px solid #334155; border-right: 1px solid #334155; border-bottom: 1px solid #334155; }
-    .metric-label { font-size: 0.65rem !important; font-weight: 700 !important; color: #94a3b8 !important; text-transform: uppercase; }
-    .metric-value { font-size: 1.15rem !important; font-weight: 800 !important; color: #ffffff !important; }
-    .t-container { width: 100% !important; overflow-x: hidden !important; margin-top: 15px; background-color: #ffffff !important; padding: 5px; border-radius: 6px; }
-    .pisa-table { width: 100% !important; border-collapse: collapse !important; table-layout: fixed !important; background-color: #ffffff !important; }
-    .pisa-table th, .pisa-table td { font-size: 0.78rem !important; padding: 6px 4px !important; text-align: center !important; white-space: normal !important; word-break: break-word !important; border: 1px solid #cbd5e1 !important; }
-    .pisa-table td { color: #0f172a !important; font-weight: 600 !important; }
-    .pisa-table th { background-color: #0052a5 !important; color: #ffffff !important; font-weight: 800 !important; text-transform: uppercase; }
+    .metric-card { background-color: #ffffff; padding: 6px 12px; border-radius: 6px; border-left: 4px solid #0052a5; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+    .metric-label { font-size: 0.65rem !important; font-weight: 700 !important; color: #475569 !important; text-transform: uppercase; }
+    .metric-value { font-size: 1.05rem !important; font-weight: 800 !important; color: #0f172a !important; }
+    .sidebar .sidebar-content { background-color: #002855; color: white; }
+    .t-container { width: 100% !important; overflow-x: hidden !important; margin-top: 10px; }
+    .pisa-table { width: 100% !important; border-collapse: collapse !important; table-layout: fixed !important; }
+    .pisa-table th, .pisa-table td { font-size: 0.72rem !important; padding: 4px 3px !important; text-align: center !important; white-space: normal !important; word-break: break-word !important; border: 1px solid #e2e8f0 !important; }
+    .pisa-table th { background-color: #0052a5 !important; color: white !important; font-weight: bold !important; }
     </style>
 """, unsafe_allow_html=True)
 col_l, col_t = st.columns(2)
 with col_l:
     if os.path.exists("stemma_pisa.png"): st.image("stemma_pisa.png", width=130)
 with col_t:
-    st.title("PISA SPORTING CLUB")
-    st.subheader("Performance & Analytics — Pianificazione Seduta")
+    st.title("🔵⚫ PISA SPORTING CLUB")
+    st.subheader("Performance & Analytics")
 st.markdown("<hr style='border-top: 2px solid #002855;'>", unsafe_allow_html=True)
 FILE_AUTO = "database_gps.xlsx"
 if os.path.exists(FILE_AUTO):
@@ -55,7 +55,7 @@ if os.path.exists(FILE_AUTO):
                 if s_cat: scelte_totali.extend(s_cat)
         if scelte_totali:
             programma = []
-            st.write("### ⏱️ Volume & Spazio di Lavoro")
+            st.write("### ⏱️ Volume & Spazio di Lavoro Fasi")
             
             # Griglia orizzontale ripristinata e pulita
             for es in scelte_totali:
@@ -88,7 +88,7 @@ if os.path.exists(FILE_AUTO):
             for col in report_finale.columns:
                 if col not in ['Nome_Esercitazione', 'Categoria']: report_finale[col] = pd.to_numeric(report_finale[col], errors='coerce').fillna(0).round(0).astype(int)
                 
-            st.write("### 📊 Carico Stimato Allenamento")
+            st.write("### 📊 Riepilogo Carico Stimato Allenamento")
             v_vol = int(report_finale['Nuovi_Minuti'].sum())
             v_dist = int(report_finale['total dist. Stimati (m)'].sum())
             col_sprint = [c for c in report_finale.columns if 'sprint' in c.lower()]
@@ -116,7 +116,7 @@ if os.path.exists(FILE_AUTO):
                 <div class="metric-card"><div class="metric-label">🛑 Breaks Totali</div><div class="metric-value">{v_brk_val}</div></div>
             </div>
             """, unsafe_allow_html=True)
-            st.write("### 📋 Tabella Complessiva Carico")
+            st.write("### 📋 Tabella Complessiva Carico Fasi")
             col_num = report_finale.select_dtypes(include=['number']).columns.tolist()
             formato_v = {c: "{:.0f}" for c in col_num}
             html_rows = ""
@@ -127,19 +127,18 @@ if os.path.exists(FILE_AUTO):
                         val = row[col]
                         max_v, min_v = report_finale[col].max(), report_finale[col].min()
                         alpha = 0.1 + 0.5 * ((val - min_v) / (max_v - min_v)) if max_v != min_v else 0.2
-                        row_html += f"<td style='background-color: rgba(0, 82, 165, {alpha:.2f}) !important;'>{val:.0f}</td>"
+                        row_html += f"<td style='background-color: rgba(0, 82, 165, {alpha:.2f}); font-weight: 500; color: #111111 !important;'>{val:.0f}</td>"
                 row_html += "</tr>"
                 html_rows += row_html
             headers_html = "<tr><th style='width: 15%;'>Nome Esercitazione</th><th style='width: 7%;'>Minuti</th><th style='width: 12%;'>Categoria</th>"
             for col in col_num:
                 if col != 'Nuovi_Minuti':
-                    nome_pulito = col.replace('total dist.', 'total dist. Stimati').replace('z2', 'z2 Stimati').replace('z3', 'z3 Stimati').replace('Tot. sprint', 'Sprint Stimati').replace('Tot. accel.', 'Accel. Stimati').replace('Tot. decel.', 'Decel. Stimati').replace('Tot. burst', 'Burst Stimati').replace('Tot. breaks', 'Breaks Stimati')
-                    headers_html += f"<th>{nome_pulito}</th>"
+                    nome_p = col.replace('total dist.', 'total dist. Stimati').replace('z2', 'z2 Stimati').replace('z3', 'z3 Stimati').replace('Tot. sprint', 'Sprint Stimati').replace('Tot. accel.', 'Accel. Stimati').replace('Tot. decel.', 'Decel. Stimati').replace('Tot. burst', 'Burst Stimati').replace('Tot. breaks', 'Breaks Stimati')
+                    headers_html += f"<th>{nome_p}</th>"
             headers_html += "</tr>"
             st.markdown(f'<div class="t-container"><table class="pisa-table"><thead>{headers_html}</thead><tbody>{html_rows}</tbody></table></div>', unsafe_allow_html=True)
             st.markdown("<div style='margin-top: 5px;'></div>", unsafe_allow_html=True)
             st.download_button(label="📥 SCARICA REPORT EXCEL UFFICIALE", data=report_finale.to_csv(index=False).encode('utf-8'), file_name='Report_Pisa_Oggi.csv', mime='text/csv')
-        else:
-            st.write("### 💡 Seleziona uno o più esercizi dai menu a sinistra.")
+        else: st.write("### 💡 Seleziona uno o più esercizi dai menu a sinistra.")
     except Exception as e: st.error(f"Errore: {e}")
 else: st.info("ℹ️ Carica il tuo file database_gps.xlsx su GitHub.")
