@@ -119,7 +119,7 @@ if os.path.exists(FILE_AUTO):
             st.write("### 📋 Tabella Complessiva Carico")
             col_num = report_finale.select_dtypes(include=['number']).columns.tolist()
             formato_v = {c: "{:.0f}" for c in col_num}
-             html_rows = ""
+            html_rows = ""
             for idx, row in report_finale.iterrows():
                 row_html = f"<tr><td>{row['Nome_Esercitazione']}</td><td>{row['Nuovi_Minuti']}</td><td>{row['Categoria']}</td>"
                 for col in col_num:
