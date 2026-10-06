@@ -70,7 +70,7 @@ if os.path.exists(FILE_AUTO):
                 if col in df_gps.columns:
                     n_col = col.replace('(m)', 'Stimati (m)').replace('n°', 'Tot.').strip()
                     rep[n_col] = rep[col] * rep['Nuovi_Minuti']
-            c_finali = ['Nome_Esercitazione', 'Nuovi_Minuti', 'Categoria'] + [col.replace('(m)', 'Stimati (m)').replace('n°','Stimati 'Tot.').strip() for col in colonne_gps if col in df_gps.columns]
+            c_finali = ['Nome_Esercitazione', 'Nuovi_Minuti', 'Categoria'] + [col.replace('(m)', 'Stimati (m)').replace('n°', 'Tot.').strip() for col in colonne_gps if col in df_gps.columns]
             report_finale = rep[c_finali].copy()
             for col in report_finale.columns:
                 if col not in ['Nome_Esercitazione', 'Categoria']: report_finale[col] = pd.to_numeric(report_finale[col], errors='coerce').fillna(0).round(0).astype(int)
