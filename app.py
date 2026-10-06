@@ -56,14 +56,15 @@ if os.path.exists(FILE_AUTO):
         # 📋 INTERFACCIA BARRA LATERALE ORDINATA SECONDO LE TUE DIRETTIVE
         st.sidebar.markdown("## 📋 CATEGORIE ALLENAMENTO")
         
-        # NUOVO ORDINE CRONOLOGICO RICHIESTO
+        # ORDINE CRONOLOGICO AGGIORNATO (CON LA VOCE PARTITA IN FONDO)
         ordine_cronologico = [
             "Attivazione",
             "tecnico-tattica", 
             "possesso",
             "preparazione atletica",
             "SSG",
-            "partita a tema"
+            "partita a tema",
+            "partita"
         ]
         
         scelte_totali = []
@@ -96,7 +97,7 @@ if os.path.exists(FILE_AUTO):
                     minuti = st.number_input(f"🏃 {es} (min)", min_value=1, max_value=120, value=15, key=f"min_{es}")
                     id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values
                     if len(id_es) > 0:
-                        programma.append({'Esercitazione_ID': str(id_es), 'Nuovi_Minuti': minuti})
+                        programma.append({'Esercitazione_ID': str(id_es[0]), 'Nuovi_Minuti': minuti})
             
             df_programma = pd.DataFrame(programma)
             report_stimato = pd.merge(df_programma, db_completo, on='Esercitazione_ID')
@@ -114,7 +115,7 @@ if os.path.exists(FILE_AUTO):
             colonne_finali = ['Nome_Esercitazione', 'Nuovi_Minuti', 'Categoria'] + [col.replace('(m)', 'Stimati (m)').replace('n°', 'Tot.').strip() for col in colonne_gps if col in df_gps_totali.columns]
             report_finale = report_stimato[colonne_finali]
             
-            # 📊 RIEPILOGO CARICO STIMATO COMPLETO VIA RIGHE GRIGLIE
+            # 📊 RIEPILOGO CARICO STIMATO COMPLETO
             st.write("### 📊 RIEPILOGO CARICO STIMATO ALLENAMENTO")
             
             # Prima riga (I 3 Principali)
@@ -158,4 +159,4 @@ if os.path.exists(FILE_AUTO):
     except Exception as e:
         st.error(f"Errore nell'elaborazione del file automatico: {e}")
 else:
-    st.info("ℹ trick Carica il tuo file database_gps.xlsx su GitHub per attivare la lettura automatica.")
+    st.info("ℹ️ Carica il tuo file database_gps.xlsx su GitHub per attivare la lettura automatica.")
