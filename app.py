@@ -119,8 +119,8 @@ if os.path.exists(FILE_AUTO):
             st.write("### 📋 Tabella Complessiva Carico")
             col_num = report_finale.select_dtypes(include=['number']).columns.tolist()
             formato_v = {c: "{:.0f}" for c in col_num}
-            html_rows = ""
-              for idx, row in report_finale.iterrows():
+             html_rows = ""
+            for idx, row in report_finale.iterrows():
                 row_html = f"<tr><td>{row['Nome_Esercitazione']}</td><td>{row['Nuovi_Minuti']}</td><td>{row['Categoria']}</td>"
                 for col in col_num:
                     if col != 'Nuovi_Minuti':
@@ -130,16 +130,16 @@ if os.path.exists(FILE_AUTO):
                         row_html += f"<td style='background-color: rgba(0, 82, 165, {alpha:.2f}) !important;'>{val:.0f}</td>"
                 row_html += "</tr>"
                 html_rows += row_html
-                   
             headers_html = "<tr><th style='width: 15%;'>Nome Esercitazione</th><th style='width: 7%;'>Minuti</th><th style='width: 12%;'>Categoria</th>"
             for col in col_num:
                 if col != 'Nuovi_Minuti':
-                    nome_p = col.replace('total dist.', 'total dist. Stimati').replace('z2', 'z2 Stimati').replace('z3', 'z3 Stimati').replace('Tot. sprint', 'Sprint Stimati').replace('Tot. accel.', 'Accel. Stimati').replace('Tot. decel.', 'Decel. Stimati').replace('Tot. burst', 'Burst Stimati').replace('Tot. breaks', 'Breaks Stimati')
-                    headers_html += f"<th>{nome_p}</th>"
+                    nome_pulito = col.replace('total dist.', 'total dist. Stimati').replace('z2', 'z2 Stimati').replace('z3', 'z3 Stimati').replace('Tot. sprint', 'Sprint Stimati').replace('Tot. accel.', 'Accel. Stimati').replace('Tot. decel.', 'Decel. Stimati').replace('Tot. burst', 'Burst Stimati').replace('Tot. breaks', 'Breaks Stimati')
+                    headers_html += f"<th>{nome_pulito}</th>"
             headers_html += "</tr>"
             st.markdown(f'<div class="t-container"><table class="pisa-table"><thead>{headers_html}</thead><tbody>{html_rows}</tbody></table></div>', unsafe_allow_html=True)
             st.markdown("<div style='margin-top: 5px;'></div>", unsafe_allow_html=True)
             st.download_button(label="📥 SCARICA REPORT EXCEL UFFICIALE", data=report_finale.to_csv(index=False).encode('utf-8'), file_name='Report_Pisa_Oggi.csv', mime='text/csv')
-        else: st.write("### 💡 Seleziona uno o più esercizi dai menu a sinistra.")
+        else:
+            st.write("### 💡 Seleziona uno o più esercizi dai menu a sinistra.")
     except Exception as e: st.error(f"Errore: {e}")
 else: st.info("ℹ️ Carica il tuo file database_gps.xlsx su GitHub.")
