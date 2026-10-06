@@ -125,7 +125,7 @@ if os.path.exists(FILE_AUTO):
             st.write("### 📋 Tabella Complessiva Carico Fasi")
             col_num = report_finale.select_dtypes(include=['number']).columns.tolist()
             formato_v = {c: "{:.0f}" for c in col_num}
-           st.dataframe(report_finale.style.background_gradient(cmap="Blues", subset=col_num, axis=0).format(formato_v), use_container_width=True)  
+            st.dataframe(report_finale.style.background_gradient(cmap="Blues", subset=col_num, axis=0).format(formato_v), use_container_width=True)  
             (
                 report_finale.style.background_gradient(cmap="Blues", subset=col_num, axis=0).format(formato_v), 
                 use_container_width=True,
