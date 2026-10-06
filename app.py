@@ -108,7 +108,7 @@ if os.path.exists(FILE_AUTO):
 
             st.markdown(f"""
             <div class="metric-container">
-                <div class="metric-card"><div class="metric-label">⏱️ Volume Totale</div><div class="metric-value">{col_vol} min</div></div>
+                <div class="metric-card"><div class="metric-label">⏱️ Volume Totale</div><div class="metric-value">{v_vol} min</div></div>
                 <div class="metric-card"><div class="metric-label">🏃 Distanza Totale</div><div class="metric-value">{col_dist} m</div></div>
                 <div class="metric-card"><div class="metric-label">⚡ Sprint Totali</div><div class="metric-value">{col_spr}</div></div>
                 <div class="metric-card"><div class="metric-label">🏃‍♂️ Zona 2 Totale</div><div class="metric-value">{col_z2} m</div></div>
