@@ -1,12 +1,11 @@
 import streamlit as st
 import pandas as pd
-import os
-st.set_page_config(page_title="Pisa SC - GPS Load Planner", layout="wide")
-st.markdown("""
-    <style>
+import os, re
+st.set_page_config(page_title="Pisa SC", layout="wide")
+st.markdown("""<style>
     .main { background-color: #f8fafc; padding: 5px 20px !important; }
     h1 { color: #002855; font-weight: 800; font-size: 1.5rem; margin: 0 !important; }
-    h3 { color: #0052a5; font-weight: 700; font-size: 1rem; margin-top: 5px !important; margin-bottom: 2px !important; }
+    h3 { color: #0052a5; font-weight: 700; font-size: 1rem; margin: 5px 0 2px 0; }
     .metric-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 5px 0 8px 0; }
     .metric-card { background-color: #ffffff; padding: 6px 12px; border-radius: 6px; border-left: 4px solid #0052a5; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
     .metric-label { font-size: 0.65rem !important; font-weight: 700 !important; color: #475569 !important; text-transform: uppercase; }
@@ -16,15 +15,11 @@ st.markdown("""
     .pisa-table { width: 100% !important; border-collapse: collapse !important; table-layout: fixed !important; }
     .pisa-table th, .pisa-table td { font-size: 0.72rem !important; padding: 4px 3px !important; text-align: center !important; white-space: normal !important; word-break: break-word !important; border: 1px solid #e2e8f0 !important; }
     .pisa-table th { background-color: #0052a5 !important; color: white !important; font-weight: bold !important; }
-    </style>
-""", unsafe_allow_html=True)
-col_l, col_t = st.columns(2)
-with col_l:
-    if os.path.exists("stemma_pisa.png"): st.image("stemma_pisa.png", width=130)
-with col_t:
-    st.title("PISA SPORTING CLUB")
-    st.subheader("Performance & Analytics — Pianificazione Seduta")
-st.markdown("<hr style='border-top: 2px solid #002855;'>", unsafe_allow_html=True)
+    .m-box { background-color: #002855; color: white; padding: 6px 10px; border-radius: 4px; font-size: 0.75rem; margin-top: 5px; }
+</style>""", unsafe_allow_html=True)
+if os.path.exists("stemma_pisa.png"): st.image("stemma_pisa.png", width=130)
+st.title("🔵⚫ PISA SPORTING CLUB")
+st.subheader("Performance & Analytics")
 FILE_AUTO = "database_gps.xlsx"
 if os.path.exists(FILE_AUTO):
     try:
@@ -55,46 +50,31 @@ if os.path.exists(FILE_AUTO):
                 if s_cat: scelte_totali.extend(s_cat)
         if scelte_totali:
             programma = []
-            st.write("### ⏱️ Volume di Lavoro")
+            st.write("### ⏱️ Volume & Spazio di Lavoro Fasi")
             cols_m = st.columns(len(scelte_totali))
             for i, es in enumerate(scelte_totali):
                 with cols_m[i]:
                     minuti = st.number_input(f"🏃 {es} (min)", min_value=1, max_value=120, value=15, key=f"m_{es}")
+                    lunghezza = st.number_input(f"📐 Lungh. {es} (m)", min_value=5, max_value=120, value=30, key=f"lu_{es}")
+                    larghezza = st.number_input(f"📐 Largh. {es} (m)", min_value=5, max_value=90, value=20, key=f"la_{es}")
+                    numeri_g = [int(s) for s in re.findall(r'\d+', str(es))]
+                    giocatori_fase = sum(numeri_g) if numeri_g else 10
+                    if giocatori_fase == 0: giocatori_fase = 10
+                    mq_fase = (lunghezza * larghezza) / giocatori_fase
+                    st.markdown(f'<div class="m-box">👥 Giocatori: <b>{giocatori_fase}</b><br>📐 Spazio: <b>{mq_fase:.1f} m²/gioc.</b></div>', unsafe_allow_html=True)
                     id_es = db_completo[db_completo['Nome_Esercitazione'] == es]['Esercitazione_ID'].values
-                    if len(id_es) > 0: 
-                        # 🛠️ CORREZIONE DEFINITIVA DI CALCOLO: inserito 'minuti'
-                        programma.append({'Esercitazione_ID': str(id_es[0]), 'Nuovi_Minuti': minuti})
+                    if len(id_es) > 0: programma.append({'Esercitazione_ID': str(id_es[0]), 'Nuovi_Minuti': minuti})
             df_prog = pd.DataFrame(programma)
             rep = pd.merge(df_prog, db_completo, on='Esercitazione_ID')
             for col in colonne_gps:
                 if col in df_gps.columns:
-                    n_col = col.replace('(m)', 'Stimati (m)').replace('n°', 'Tot.').strip()
+                    n_col = col.replace('(m)', 'Stimati (m)').replace('n°', 'Tot.').replace('total dist.', 'total dist. Stimati').replace('z2', 'z2 Stimati').replace('z3', 'z3 Stimati').strip()
                     rep[n_col] = rep[col] * rep['Nuovi_Minuti']
-            c_finali = ['Nome_Esercitazione', 'Nuovi_Minuti', 'Categoria'] + [col.replace('(m)', 'Stimati (m)').replace('n°', 'Tot.').strip() for col in colonne_gps if col in df_gps.columns]
+            c_finali = ['Nome_Esercitazione', 'Nuovi_Minuti', 'Categoria'] + [col.replace('(m)', 'Stimati (m)').replace('n°', 'Tot.').replace('total dist.', 'total dist. Stimati').replace('z2', 'z2 Stimati').replace('z3', 'z3 Stimati').strip() for col in colonne_gps if col in df_gps.columns]
             report_finale = rep[c_finali].copy()
             for col in report_finale.columns:
                 if col not in ['Nome_Esercitazione', 'Categoria']: report_finale[col] = pd.to_numeric(report_finale[col], errors='coerce').fillna(0).round(0).astype(int)
             st.write("### 📊 Riepilogo Carico Stimato Allenamento")
-            st.write("### 📐 Dimensioni Spazio di Gioco Odierno")
-            col_lung, col_larg = st.columns(2)
-            with col_lung:
-                lunghezza = st.slider("Lunghezza Campo (metri):", min_value=10, max_value=120, value=30, step=1)
-            with col_larg:
-                larghezza = st.slider("Larghezza Campo (metri):", min_value=10, max_value=90, value=20, step=1)
-            import re
-            tot_giocatori_rilevati = 0
-            for es in scelte_totali:
-                numeri = [int(s) for s in re.findall(r'\d+', str(es))]
-                tot_giocatori_rilevati += sum(numeri) if numeri else 10
-            if tot_giocatori_rilevati == 0: tot_giocatori_rilevati = 10
-            area_totale = lunghezza * larghezza
-            mq_giocatore = area_totale / tot_giocatori_rilevati
-            if mq_giocatore < 60:
-                focus = " SPAZIO STRETTO"
-            elif 60 <= mq_giocatore <= 90:
-                focus = "SPAZIO MEDIO"
-            else:
-                focus = "SPAZIO AMPIO "
             v_vol = int(report_finale['Nuovi_Minuti'].sum())
             v_dist = int(report_finale['total dist. Stimati (m)'].sum())
             col_sprint = [c for c in report_finale.columns if 'sprint' in c.lower()]
@@ -109,9 +89,8 @@ if os.path.exists(FILE_AUTO):
             v_bur_val = int(report_finale[col_bur].sum().sum()) if col_bur else 0
             col_brk = [c for c in report_finale.columns if 'breaks' in c.lower()]
             v_brk_val = int(report_finale[col_brk].sum().sum()) if col_brk else 0
-            st.markdown(f"""
-            <div class="metric-container">
-                <div class="metric-card"><div class="metric-label">⏱️ Volume Totale</div><div class="metric-value">{v_vol} min</div></div>
+            st.markdown(f"""<div class="metric-container">
+                <div class="metric-card"><div class="metric-label">⏱ Volume Totale</div><div class="metric-value">{v_vol} min</div></div>
                 <div class="metric-card"><div class="metric-label">🏃 Distanza Totale</div><div class="metric-value">{v_dist} m</div></div>
                 <div class="metric-card"><div class="metric-label">⚡ Sprint Totali</div><div class="metric-value">{v_spr}</div></div>
                 <div class="metric-card"><div class="metric-label">🏃‍♂️ Zona 2 Totale</div><div class="metric-value">{v_z2} m</div></div>
@@ -120,15 +99,15 @@ if os.path.exists(FILE_AUTO):
                 <div class="metric-card"><div class="metric-label">📉 Decelerazioni</div><div class="metric-value">{v_dec}</div></div>
                 <div class="metric-card"><div class="metric-label">💥 Burst Totali</div><div class="metric-value">{v_bur_val}</div></div>
                 <div class="metric-card"><div class="metric-label">🛑 Breaks Totali</div><div class="metric-value">{v_brk_val}</div></div>
-            </div>
-            """, unsafe_allow_html=True)
+            </div>""", unsafe_allow_html=True)
             st.write("### 📋 Tabella Complessiva Carico Fasi")
             col_num = report_finale.select_dtypes(include=['number']).columns.tolist()
+            formato_v = {c: "{:.0f}" for c in col_num}
             html_rows = ""
             for idx, row in report_finale.iterrows():
                 row_html = f"<tr><td>{row['Nome_Esercitazione']}</td><td>{row['Nuovi_Minuti']}</td><td>{row['Categoria']}</td>"
                 for col in col_num:
-                   if col != 'Nuovi_Minuti':
+                    if col != 'Nuovi_Minuti':
                         val = row[col]
                         max_v, min_v = report_finale[col].max(), report_finale[col].min()
                         alpha = 0.1 + 0.5 * ((val - min_v) / (max_v - min_v)) if max_v != min_v else 0.2
@@ -137,14 +116,13 @@ if os.path.exists(FILE_AUTO):
                 html_rows += row_html
             headers_html = "<tr><th style='width: 15%;'>Nome Esercitazione</th><th style='width: 7%;'>Minuti</th><th style='width: 12%;'>Categoria</th>"
             for col in col_num:
-                 if col != 'Nuovi_Minuti':
-                    nome_pulito = col.replace('z2', 'z2 Stimati').replace('z3', 'z3 Stimati').replace('Tot. sprint', 'Sprint Stimati').replace('Tot. accel.', 'Accel. Stimati').replace('Tot. decel.', 'Decel. Stimati').replace('Tot. burst', 'Burst Stimati').replace('Tot. breaks', 'Breaks Stimati')
-                    headers_html += f"<th>{nome_pulito}</th>"
+                if col != 'Nuovi_Minuti':
+                    nome_p = col.replace('total dist.', 'total dist. Stimati').replace('z2', 'z2 Stimati').replace('z3', 'z3 Stimati').replace('Tot. sprint', 'Sprint Stimati').replace('Tot. accel.', 'Accel. Stimati').replace('Tot. decel.', 'Decel. Stimati').replace('Tot. burst', 'Burst Stimati').replace('Tot. breaks', 'Breaks Stimati')
+                    headers_html += f"<th>{nome_p}</th>"
             headers_html += "</tr>"
             st.markdown(f'<div class="t-container"><table class="pisa-table"><thead>{headers_html}</thead><tbody>{html_rows}</tbody></table></div>', unsafe_allow_html=True)
             st.markdown("<div style='margin-top: 5px;'></div>", unsafe_allow_html=True)
             st.download_button(label="📥 SCARICA REPORT EXCEL UFFICIALE", data=report_finale.to_csv(index=False).encode('utf-8'), file_name='Report_Pisa_Oggi.csv', mime='text/csv')
-        else:
-            st.write("### 💡 Seleziona uno o più esercizi dai menu a sinistra.")
+        else: st.write("### 💡 Seleziona uno o più esercizi dai menu a sinistra.")
     except Exception as e: st.error(f"Errore: {e}")
 else: st.info("ℹ️ Carica il tuo file database_gps.xlsx su GitHub.")
