@@ -111,10 +111,10 @@ if os.path.exists(FILE_AUTO):
                     if col != 'Nuovi_Minuti':
                         val = row[col]
                         max_v, min_v = report_finale[col].max(), report_finale[col].min()
-                         if max_v != min_v:
-                            alpha = 0.1 + 0.5 * ((val - min_v) / (max_v - min_v))
+                        if max_v != min_v:
+                        alpha = 0.1 + 0.5 * ((val - min_v) / (max_v - min_v))
                         else:
-                            alpha = 0.2
+                        alpha = 0.2
                         bg_style = f"style='background-color: rgba(0, 82, 165, {alpha:.2f}); font-weight: 500; color: #111111 !important;'"
                         row_html += f"<td {bg_style}>{val:.0f}</td>"
                 row_html += "</tr>"
